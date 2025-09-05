@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            color: #1c1e21;
+        }
+
+        /* Main 3-Column Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 240px 1fr 320px;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* --- Left Sidebar (Navigation) --- */
+        .left-sidebar {
+            position: sticky; /* MODIFIED: Makes the sidebar sticky */
+            top: 20px;      /* MODIFIED: Sticks it 20px from the top */
+            align-self: start; /* MODIFIED: Aligns to the top of the grid area */
+        }
+        .nav-link {
+            display: block;
+            text-decoration: none;
+            color: #1c1e21;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .nav-link:hover {
+            background-color: #f0f2f5;
+        }
+
+        /* --- Center Column (Post Feed) --- */
+        .post {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .post-header { display: flex; align-items: center; padding: 15px; }
+        .post-author { font-weight: bold; }
+        .post-author a { color: inherit; text-decoration: none; }
+        .post-author a:hover { text-decoration: underline; }
+        .post-date { font-size: 0.9em; color: #8e8e8e; margin-left: 10px; }
+        .post-content { padding: 0 15px 15px 15px; }
+        .post img { width: 100%; max-height: 600px; object-fit: cover; border-top: 1px solid #dbdbdb; border-bottom: 1px solid #dbdbdb; }
+        .post-footer { padding: 10px 15px; font-size: 0.9em; color: #8e8e8e; border-top: 1px solid #dbdbdb; }
+
+        /* --- Right Sidebar (Create Post & Profile) --- */
+        .right-sidebar {
+            position: sticky; /* MODIFIED: Makes the sidebar sticky */
+            top: 20px;      /* MODIFIED: Sticks it 20px from the top */
+            align-self: start; /* MODIFIED: Aligns to the top of the grid area */
+        }
+        .profile-summary-card, .post-form-card {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        textarea, input[type="text"] {
+            width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
+            margin-bottom: 10px; box-sizing: border-box; font-size: 16px;
+        }
+        button {
+            background-color: #007bff; color: white; border: none; padding: 10px 15px;
+            border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%;
+        }
+        button:hover { background-color: #0056b3; }
+
+        /* Responsive adjustments */
+        @media (max-width: 1000px) {
+            .main-container { grid-template-columns: 1fr 320px; }
+            .left-sidebar { display: none; }
+        }
+        @media (max-width: 768px) {
+            .main-container { grid-template-columns: 1fr; }
+            .right-sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-sidebar">
+            <a href="home.html" class="nav-link">🏠 Home</a>
+            <a href="profile.html" class="nav-link">👤 My Profile</a>
+            <a href="settings.html" class="nav-link">⚙️ Settings</a>
+        </div>
+
+        <div class="center-feed">
+            <div id="posts-container">
+                </div>
+        </div>
+
+        <div class="right-sidebar">
+            <div class="profile-summary-card">
+                <h3 id="current-user-username">Your Profile</h3>
+            </div>
+            <div class="post-form-card">
+                <h3>Create a New Post</h3>
+                <form id="create-post-form">
+                    <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
+                    <input type="text" id="image-url" placeholder="Optional: Image URL">
+                    <button type="submit">Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your JavaScript is unchanged and does not need to be modified.
+        const createPostForm = document.getElementById('create-post-form');
+        const postsContainer = document.getElementById('posts-container');
+        const token = localStorage.getItem('jwt_token');
+
+        async function fetchPosts() {
+            if (!token) { window.location.href = 'index.html'; return; }
+            try {
+                const response = await fetch('http://localhost:8080/api/posts', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.status === 401) {
+                    localStorage.removeItem('jwt_token');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                if (!response.ok) throw new Error('Failed to fetch posts.');
+                const posts = await response.json();
+                postsContainer.innerHTML = '';
+                posts.forEach(post => displayPost(post));
+            } catch (error) { alert(error.message); }
+        }
+
+        function displayPost(post, prepend = false) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image">` : '';
+            const postDate = new Date(post.createdAt).toLocaleString();
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <div class="post-author"><a href="profile.html?username=${post.authorUsername}">${post.authorUsername}</a></div>
+                    <div class="post-date">${postDate}</div>
+                </div>
+                ${imageHtml}
+                <div class="post-content"><p>${post.content}</p></div>
+                <div class="post-footer">
+                    <span>Likes: ${post.likesCount}</span> | <span>Comments: ${post.commentsCount}</span>
+                </div>`;
+            if (prepend) { postsContainer.prepend(postElement); }
+            else { postsContainer.appendChild(postElement); }
+        }
+
+        createPostForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const content = document.getElementById('post-content').value;
+            const imageUrl = document.getElementById('image-url').value;
+            try {
+                const response = await fetch('http://localhost:8080/api/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ content, imageUrl })
+                });
+                if (!response.ok) throw new Error('Failed to create post.');
+                const newPost = await response.json();
+                displayPost(newPost, true);
+                createPostForm.reset();
+            } catch (error) { alert(error.message); }
+        });
+
+        window.onload = fetchPosts;
+    </script>
+</body>
+</html>

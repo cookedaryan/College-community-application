@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; color: #1c1e21; }
+        .navbar { background-color: white; padding: 10px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-bottom: 1px solid #dbdbdb; }
+        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-left: 15px; }
+        .container { max-width: 600px; margin: 20px auto; }
+        .profile-header-card { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); padding: 20px; margin-bottom: 20px; }
+        .post { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); padding: 20px; margin-bottom: 20px; }
+        .post-header { display: flex; align-items: center; margin-bottom: 10px; }
+        .post-author { font-weight: bold; }
+        .post-author a { color: inherit; text-decoration: none; }
+        .post-author a:hover { text-decoration: underline; }
+        .post-date { font-size: 0.9em; color: #606770; margin-left: 10px; }
+        .post-content { margin-bottom: 10px; }
+        .post img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+        .post-footer { font-size: 0.9em; color: #606770; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="home.html" class="nav-link">Home</a>
+    </div>
+
+    <div class="container">
+        <div class="profile-header-card">
+            <h1 id="profile-username"></h1>
+        </div>
+        <div id="posts-container">
+            </div>
+    </div>
+
+    <script>
+        const postsContainer = document.getElementById('posts-container');
+        const profileUsernameEl = document.getElementById('profile-username');
+        const token = localStorage.getItem('jwt_token');
+
+        function getUsernameFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('username');
+        }
+
+        // Using the full displayPost function from home.html
+        function displayPost(post) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image">` : '';
+            const postDate = new Date(post.createdAt).toLocaleString();
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <div class="post-author">${post.authorUsername}</div>
+                    <div class="post-date">${postDate}</div>
+                </div>
+                <div class="post-content">
+                    <p>${post.content}</p>
+                    ${imageHtml}
+                </div>
+                <div class="post-footer">
+                    <span>Likes: ${post.likesCount}</span> | 
+                    <span>Comments: ${post.commentsCount}</span>
+                </div>`;
+            postsContainer.appendChild(postElement);
+        }
+
+        async function fetchUserProfile() {
+            const username = getUsernameFromUrl();
+            if (!username) {
+                profileUsernameEl.textContent = 'User not found.';
+                return;
+            }
+
+            profileUsernameEl.textContent = `${username}'s Profile`;
+
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/users/${username}/profile`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('jwt_token');
+                    alert('Your session has expired. Please log in again.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                if (!response.ok) throw new Error('Could not fetch user profile.');
+
+                const posts = await response.json();
+                postsContainer.innerHTML = ''; 
+                if (posts.length === 0) {
+                    postsContainer.innerHTML = '<p style="text-align: center; color: #606770;">This user has no posts yet.</p>';
+                } else {
+                    posts.forEach(post => displayPost(post));
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        window.onload = fetchUserProfile;
+    </script>
+</body>
+</html>
