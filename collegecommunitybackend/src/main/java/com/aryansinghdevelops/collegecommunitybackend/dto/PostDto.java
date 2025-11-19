@@ -4,6 +4,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 public class PostDto {
+
     @Data
     public static class PostCreateRequest {
         private String content;
@@ -19,5 +20,6 @@ public class PostDto {
         private int commentsCount;
         private OffsetDateTime createdAt;
         private String authorUsername;
+        private String authorAvatarUrl; // <-- ADDED
     }
 }

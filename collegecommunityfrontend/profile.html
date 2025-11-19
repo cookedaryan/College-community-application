@@ -3,111 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title>Profile</title>
     <style>
+        /* Base Styles */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; color: #1c1e21; }
-        .navbar { background-color: white; padding: 10px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-bottom: 1px solid #dbdbdb; }
-        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-left: 15px; }
-        .container { max-width: 600px; margin: 20px auto; }
-        .profile-header-card { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); padding: 20px; margin-bottom: 20px; }
-        .post { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); padding: 20px; margin-bottom: 20px; }
-        .post-header { display: flex; align-items: center; margin-bottom: 10px; }
-        .post-author { font-weight: bold; }
-        .post-author a { color: inherit; text-decoration: none; }
-        .post-author a:hover { text-decoration: underline; }
-        .post-date { font-size: 0.9em; color: #606770; margin-left: 10px; }
-        .post-content { margin-bottom: 10px; }
-        .post img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
-        .post-footer { font-size: 0.9em; color: #606770; }
+        .top-nav { background-color: white; border-bottom: 1px solid #dbdbdb; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
+        .top-nav-content { max-width: 975px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .nav-left { display: flex; align-items: center; gap: 25px; }
+        .nav-logo { font-size: 24px; font-weight: bold; color: #007bff; text-decoration: none; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { text-decoration: none; color: #555; font-weight: 600; font-size: 16px; padding: 8px 12px; border-radius: 6px; }
+        .nav-links a.active, .nav-links a:hover { background-color: #f0f2f5; color: #000; }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .announce-btn { background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .profile-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* Profile Page Specific Styles */
+        .profile-container { max-width: 700px; margin: 30px auto; padding: 0 20px; }
+        .profile-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; padding: 30px; text-align: center; }
+        .profile-avatar { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px auto; background-color: #eee; }
+        .profile-username { font-size: 28px; font-weight: 600; margin: 0; }
+        .profile-scholar-id { font-size: 16px; color: #65676b; margin-top: 5px; margin-bottom: 15px; }
+        .profile-bio { font-size: 16px; margin-bottom: 20px; }
+        .profile-stats { display: flex; justify-content: center; gap: 30px; list-style: none; padding: 0; margin: 0 auto 20px auto; }
+        .profile-stats li { font-size: 16px; color: #65676b; }
+        .profile-stats span { font-weight: 600; color: #000; }
+        .profile-actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .profile-btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid #dbdbdb; background-color: #f0f2f5; }
+        .profile-btn.primary { background-color: #007bff; color: white; border-color: #007bff; }
+        .profile-btn.following { background-color: white; color: #000; border-color: #dbdbdb; }
+        .profile-info-list { list-style: none; padding: 0; text-align: left; max-width: 300px; margin: 20px auto 0 auto; }
+        .profile-info-list li { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+        .hidden { display: none; }
+
+        /* Posts Feed Styles */
+        .posts-header { font-size: 18px; font-weight: 600; margin-top: 40px; margin-bottom: 20px; }
+        .post-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .post-header { display: flex; align-items: center; padding: 12px 16px; }
+        .post-header img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; margin-right: 12px; background-color: #eee; }
+        .post-author-info { display: flex; flex-direction: column; }
+        .post-author-name { font-weight: 600; font-size: 16px; text-decoration: none; }
+        .post-author-name:hover { text-decoration: underline; }
+        .post-meta { font-size: 14px; color: #65676b; }
+        .post-content { padding: 4px 16px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
+        .post-image { width: 100%; margin-top: 12px; }
+        .post-actions { display: flex; justify-content: space-around; padding: 8px 16px; border-top: 1px solid #f0f2f5; margin-top: 12px; }
+        .action-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600; color: #65676b; padding: 8px; border-radius: 6px; }
+        .action-btn:hover { background-color: #f0f2f5; }
+        .action-btn svg { width: 20px; height: 20px; }
+        .like-btn.liked svg { fill: #ed4956; color: #ed4956; }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="home.html" class="nav-link">Home</a>
-    </div>
 
-    <div class="container">
-        <div class="profile-header-card">
-            <h1 id="profile-username"></h1>
-        </div>
-        <div id="posts-container">
+    <header class="top-nav">
+        <div class="top-nav-content">
+            <div class="nav-left">
+                <a href="home.html" class="nav-logo">⚡</a>
+                <nav class="nav-links">
+                    <a href="home.html">Home</a>
+                    <a href="search.html">Search</a>
+                    <a href="#">Activity</a>
+                    <a href="profile.html" class="active">Profile</a>
+                </nav>
             </div>
-    </div>
+            <div class="nav-right">
+                <button class="announce-btn">Announce</button>
+                <img src="https://via.placeholder.com/32" alt="My Profile" class="profile-pic" id="nav-profile-pic">
+            </div>
+        </div>
+    </header>
+
+    <main class="profile-container">
+        <section class="profile-card">
+            <img alt="Profile Avatar" class="profile-avatar" id="profile-avatar">
+            <h1 class="profile-username" id="profile-username">Loading...</h1>
+            <div class="profile-scholar-id" id="profile-scholar-id"></div>
+            <p class="profile-bio" id="profile-bio">Student at College | Building cool stuff ✨</p>
+            
+            <ul class="profile-stats">
+                <li><span id="post-count">0</span> Posts</li>
+                <li><span id="follower-count">0</span> Followers</li>
+                <li><span id="following-count">0</span> Following</li>
+            </ul>
+
+            <div class="profile-actions">
+                <button id="edit-profile-btn" class="profile-btn hidden">Edit Profile</button>
+                <button id="follow-btn" class="profile-btn hidden">Follow</button>
+                <button id="share-profile-btn" class="profile-btn">Share Profile</button>
+            </div>
+        </section>
+
+        <h2 class="posts-header" id="posts-header">Posts</h2>
+        <div id="posts-container">
+            <p id="empty-posts-message" class="hidden" style="text-align: center; color: #65676b;">No posts yet. Start sharing your thoughts!</p>
+        </div>
+    </main>
 
     <script>
-        const postsContainer = document.getElementById('posts-container');
-        const profileUsernameEl = document.getElementById('profile-username');
         const token = localStorage.getItem('jwt_token');
 
+        // Get elements
+        const profileAvatarEl = document.getElementById('profile-avatar');
+        const profileUsernameEl = document.getElementById('profile-username');
+        const profileScholarIdEl = document.getElementById('profile-scholar-id');
+        const profileBioEl = document.getElementById('profile-bio');
+        const postCountEl = document.getElementById('post-count');
+        const followerCountEl = document.getElementById('follower-count');
+        const followingCountEl = document.getElementById('following-count');
+        const postsContainer = document.getElementById('posts-container');
+        const postsHeaderEl = document.getElementById('posts-header');
+        const emptyPostsMessageEl = document.getElementById('empty-posts-message');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const followBtn = document.getElementById('follow-btn');
+        
+        // --- SVG ICONS ---
+        const heartIcon = `
+            <svg aria-label="Like" fill="currentColor" role="img" viewBox="0 0 24 24">
+                <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-6.12 8.424-3.468 3.465-6.12 6.12-6.12 6.12s-2.652-2.655-6.12-6.12C-2.652 14.08.001 12.192.001 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.118-1.763a4.21 4.21 0 0 1 3.675-1.941z"></path>
+            </svg>`;
+        const commentIcon = `<svg aria-label="Comment" fill="currentColor" role="img" viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z"></path></svg>`;
+        const retweetIcon = `<svg aria-label="Repost" fill="currentColor" viewBox="0 0 24 24"><path d="M23.77 15.67c-.292-.293-.767-.293-1.06 0l-2.22 2.22V7.65c0-2.068-1.683-3.75-3.75-3.75h-5.85c-.414 0-.75.336-.75.75s.336.75.75.75h5.85c1.24 0 2.25 1.01 2.25 2.25v10.24l-2.22-2.22c-.293-.293-.768-.293-1.06 0s-.294.768 0 1.06l3.5 3.5c.145.147.337.22.53.22s.383-.072.53-.22l3.5-3.5c.294-.293.294-.767 0-1.06zm-10.66 3.28H7.26c-1.24 0-2.25-1.01-2.25-2.25V6.46l2.22 2.22c.148.147.34.22.532.22s.384-.073.53-.22c.293-.293.293-.768 0-1.06l-3.5-3.5c-.145-.147-.337-.22-.53-.22s-.383.072-.53.22l-3.5 3.5c-.294.293-.294.767 0 1.06s.768.293 1.06 0l2.22-2.22v10.24c0 2.068 1.683 3.75 3.75 3.75h5.85c.414 0 .75-.336.75-.75s-.337-.75-.75-.75z"></path></svg>`;
+        const shareIcon = `<svg aria-label="Share" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 3.001a.998.998 0 0 1 .998.998v8.662l3.79-3.79a.999.999 0 1 1 1.414 1.414l-5.495 5.495a1 1 0 0 1-1.414 0L6.2 10.285a.999.999 0 1 1 1.414-1.414l3.79 3.79V4a.998.998 0 0 1 .599-.913.997.997 0 0 1 1.001.913Zm-10.5 8.5H1.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h21a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-6.995v1.5a2.5 2.5 0 0 1-5.01 0V11.5Z"></path></svg>`;
+
+        
         function getUsernameFromUrl() {
             const params = new URLSearchParams(window.location.search);
             return params.get('username');
         }
 
-        // Using the full displayPost function from home.html
-        function displayPost(post) {
-            const postElement = document.createElement('div');
-            postElement.classList.add('post');
-            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image">` : '';
-            const postDate = new Date(post.createdAt).toLocaleString();
-
-            postElement.innerHTML = `
-                <div class="post-header">
-                    <div class="post-author">${post.authorUsername}</div>
-                    <div class="post-date">${postDate}</div>
-                </div>
-                <div class="post-content">
-                    <p>${post.content}</p>
-                    ${imageHtml}
-                </div>
-                <div class="post-footer">
-                    <span>Likes: ${post.likesCount}</span> | 
-                    <span>Comments: ${post.commentsCount}</span>
-                </div>`;
-            postsContainer.appendChild(postElement);
-        }
-
-        async function fetchUserProfile() {
-            const username = getUsernameFromUrl();
-            if (!username) {
-                profileUsernameEl.textContent = 'User not found.';
-                return;
-            }
-
-            profileUsernameEl.textContent = `${username}'s Profile`;
-
-            if (!token) {
+        async function renderProfilePage() {
+            const profileUsername = getUsernameFromUrl();
+            if (!token || !profileUsername) {
                 window.location.href = 'index.html';
                 return;
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/users/${username}/profile`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const [currentUserRes, profileRes] = await Promise.all([
+                    fetch('http://localhost:8080/api/users/me', { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch(`http://localhost:8080/api/users/${profileUsername}/profile`, { headers: { 'Authorization': 'Bearer ' + token } })
+                ]);
 
-                if (response.status === 401 || response.status === 403) {
+                if (currentUserRes.status === 401 || profileRes.status === 401) {
                     localStorage.removeItem('jwt_token');
                     alert('Your session has expired. Please log in again.');
                     window.location.href = 'index.html';
                     return;
                 }
-                
-                if (!response.ok) throw new Error('Could not fetch user profile.');
+                if (!currentUserRes.ok || !profileRes.ok) throw new Error('Failed to fetch profile data.');
 
-                const posts = await response.json();
-                postsContainer.innerHTML = ''; 
-                if (posts.length === 0) {
-                    postsContainer.innerHTML = '<p style="text-align: center; color: #606770;">This user has no posts yet.</p>';
-                } else {
-                    posts.forEach(post => displayPost(post));
-                }
+                const currentUser = await currentUserRes.json();
+                const profileData = await profileRes.json();
+
+                populateProfileHeader(profileData);
+                populateActionButtons(currentUser, profileData);
+                populatePosts(profileData.posts, profileData.username);
+
             } catch (error) {
+                console.error('Error fetching profile:', error);
                 alert(error.message);
             }
         }
 
-        window.onload = fetchUserProfile;
+        function populateProfileHeader(data) {
+            // --- UPDATED: Use placeholder if avatarUrl is null/empty ---
+            const avatarUrl = data.avatarUrl ? data.avatarUrl : 'https://via.placeholder.com/150';
+            profileAvatarEl.src = avatarUrl;
+            
+            profileUsernameEl.textContent = data.username;
+            postCountEl.textContent = data.postCount;
+            followerCountEl.textContent = data.followerCount;
+            followingCountEl.textContent = data.followingCount;
+        }
+
+        function populateActionButtons(currentUser, profileData) {
+            if (currentUser.username === profileData.username) {
+                editProfileBtn.classList.remove('hidden');
+            } else {
+                followBtn.classList.remove('hidden');
+                if (profileData.isFollowing) {
+                    followBtn.textContent = 'Following';
+                    followBtn.classList.add('following');
+                } else {
+                    followBtn.textContent = 'Follow';
+                    followBtn.classList.remove('following');
+                    followBtn.classList.add('primary');
+                }
+            }
+        }
+
+        function populatePosts(posts, authorName) {
+            postsContainer.innerHTML = '';
+            if (posts.length === 0) {
+                emptyPostsMessageEl.classList.remove('hidden');
+                postsHeaderEl.textContent = "Posts";
+            } else {
+                postsHeaderEl.textContent = "Posts";
+                emptyPostsMessageEl.classList.add('hidden');
+                posts.forEach(post => displayPost(post));
+            }
+        }
+
+        function displayPost(post) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post-card');
+            const postDate = new Date(post.createdAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : '';
+            
+            // --- UPDATED: Use placeholder if authorAvatarUrl is null/empty ---
+            const avatarUrl = post.authorAvatarUrl ? post.authorAvatarUrl : 'https://via.placeholder.com/42';
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <img src="${avatarUrl}" alt="${post.authorUsername}'s profile pic" class="profile-pic">
+                    <div class="post-author-info">
+                        <a href="profile.html?username=${post.authorUsername}" class="post-author-name">${post.authorUsername}</a>
+                        <span class="post-meta">#${post.authorUsername} · ${postDate}</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <p>${post.content}</p>
+                    ${imageHtml}
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn">
+                        ${heartIcon} <span>${post.likesCount}</span>
+                    </button>
+                    <button class="action-btn">
+                        ${commentIcon} <span>${post.commentsCount}</span>
+                    </button>
+                    <button class="action-btn">${retweetIcon} <span>0</span></button>
+                    <button class="action-btn">${shareIcon}</button>
+                </div>`;
+
+            const likeBtn = postElement.querySelector('.like-btn');
+            likeBtn.addEventListener('click', () => {
+                likeBtn.classList.toggle('liked');
+            });
+            
+            postsContainer.appendChild(postElement);
+        }
+
+        followBtn.addEventListener('click', async () => {
+            const profileUsername = getUsernameFromUrl();
+            const isCurrentlyFollowing = followBtn.classList.contains('following');
+            const method = isCurrentlyFollowing ? 'DELETE' : 'POST';
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/users/${profileUsername}/follow`, {
+                    method: method,
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) throw new Error('Follow/Unfollow action failed.');
+
+                if (isCurrentlyFollowing) {
+                    followBtn.textContent = 'Follow';
+                    followBtn.classList.remove('following');
+                    followBtn.classList.add('primary');
+                    followerCountEl.textContent = parseInt(followerCountEl.textContent) - 1;
+                } else {
+                    followBtn.textContent = 'Following';
+                    followBtn.classList.add('following');
+                    followBtn.classList.remove('primary');
+                    followerCountEl.textContent = parseInt(followerCountEl.textContent) + 1;
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        window.onload = renderProfilePage;
     </script>
 </body>
 </html>

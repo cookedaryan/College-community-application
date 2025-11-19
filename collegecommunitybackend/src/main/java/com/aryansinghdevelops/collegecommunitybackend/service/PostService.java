@@ -6,7 +6,7 @@ import com.aryansinghdevelops.collegecommunitybackend.model.User;
 import com.aryansinghdevelops.collegecommunitybackend.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // <-- ADD THIS IMPORT
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +17,7 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    @Transactional // Good practice for write operations
+    @Transactional
     public PostDto.PostResponse createPost(PostDto.PostCreateRequest request, User currentUser) {
         Post newPost = new Post();
         newPost.setContent(request.getContent());
@@ -28,7 +28,6 @@ public class PostService {
         return mapToPostResponse(savedPost);
     }
 
-    // <-- ADD THIS ANNOTATION
     @Transactional(readOnly = true)
     public List<PostDto.PostResponse> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
@@ -36,7 +35,6 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // <-- ADD THIS ANNOTATION
     @Transactional(readOnly = true)
     public List<PostDto.PostResponse> getPostsByUser(User user) {
         return postRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream()
@@ -44,7 +42,6 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // Helper method to convert a Post entity to a PostResponse DTO
     private PostDto.PostResponse mapToPostResponse(Post post) {
         PostDto.PostResponse response = new PostDto.PostResponse();
         response.setId(post.getId());
@@ -54,6 +51,7 @@ public class PostService {
         response.setCommentsCount(post.getCommentsCount());
         response.setCreatedAt(post.getCreatedAt());
         response.setAuthorUsername(post.getUser().getDisplayName());
+        response.setAuthorAvatarUrl(post.getUser().getAvatarUrl()); // <-- ADDED
         return response;
     }
 }

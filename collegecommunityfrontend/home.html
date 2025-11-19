@@ -3,165 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Home Feed</title>
     <style>
-        /* General Body Styles */
+        /* Base Styles */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #fafafa;
+            background-color: #f0f2f5;
             margin: 0;
             color: #1c1e21;
         }
 
-        /* Main 3-Column Layout */
-        .main-container {
-            display: grid;
-            grid-template-columns: 240px 1fr 320px;
-            gap: 30px;
-            max-width: 1200px;
-            margin: 20px auto;
+        /* Top Navigation Bar */
+        .top-nav {
+            background-color: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .top-nav-content {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .nav-links a.active,
+        .nav-links a:hover {
+            background-color: #f0f2f5;
+            color: #000;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .announce-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Main Feed Container */
+        .feed-container {
+            max-width: 650px;
+            margin: 30px auto;
             padding: 0 20px;
         }
 
-        /* --- Left Sidebar (Navigation) --- */
-        .left-sidebar {
-            position: sticky;
-            top: 20px;      
-            align-self: start;
-        }
-        .nav-link {
-            display: block;
-            text-decoration: none;
-            color: #1c1e21;
-            font-weight: bold;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .nav-link:hover {
-            background-color: #f0f2f5;
-        }
-
-        /* --- Center Column (Post Feed) --- */
-        .post {
+        /* Post Card Styles */
+        .post-card {
             background: white;
             border: 1px solid #dbdbdb;
             border-radius: 8px;
             margin-bottom: 20px;
+            overflow: hidden; /* Ensures image corners are rounded */
         }
-        .post-header { display: flex; align-items: center; padding: 15px; }
-        .post-author { font-weight: bold; }
-        .post-author a { color: inherit; text-decoration: none; }
-        .post-author a:hover { text-decoration: underline; }
-        .post-date { font-size: 0.9em; color: #8e8e8e; margin-left: 10px; }
-        .post-content { padding: 0 15px 15px 15px; }
-        .post img { width: 100%; max-height: 600px; object-fit: cover; border-top: 1px solid #dbdbdb; border-bottom: 1px solid #dbdbdb; }
-        .post-footer { padding: 10px 15px; font-size: 0.9em; color: #8e8e8e; border-top: 1px solid #dbdbdb; }
-
-        /* --- Right Sidebar (Create Post & Profile) --- */
-        .right-sidebar {
-            position: sticky; 
-            top: 20px;     
-            align-self: start; 
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
         }
-        .profile-summary-card, .post-form-card {
-            background: #fafafa;
+        .post-header img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            background-color: #eee;
+        }
+        .post-author-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .post-author-name {
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        .post-author-name:hover {
+            text-decoration: underline;
+        }
+        .post-meta {
+            font-size: 14px;
+            color: #65676b;
+        }
+        .post-options {
+            margin-left: auto;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .post-content {
+            padding: 4px 16px;
+            font-size: 16px;
+            line-height: 1.4;
+            word-wrap: break-word; /* Prevents long text from overflowing */
+        }
+        .post-image {
+            width: 100%;
+            margin-top: 12px;
+        }
+        
+        /* Post Actions (Like, Comment, etc.) */
+        .post-actions {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 16px;
+            border-top: 1px solid #f0f2f5;
+            margin-top: 12px;
+        }
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #65676b;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .action-btn:hover {
+            background-color: #f0f2f5;
+        }
+        .action-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+        .like-btn.liked svg {
+            fill: #ed4956;
+            color: #ed4956;
+        }
+        
+        /* Create Post Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #dbdbdb;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            font-weight: 300;
+            cursor: pointer;
+            color: #65676b;
+        }
+        .modal-body { padding: 20px; }
+        .post-form-card { padding: 0; }
+        .post-form-card textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dbdbdb;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .post-form-card input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dbdbdb;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .post-form-card button {
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
         }
-        textarea, input[type="text"] {
-            width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
-            margin-bottom: 10px; box-sizing: border-box; font-size: 16px;
-        }
-        button {
-            background-color: #007bff; color: white; border: none; padding: 10px 15px;
-            border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%;
-        }
-        button:hover { background-color: #0056b3; }
-
-        /* Responsive adjustments */
-        @media (max-width: 1000px) {
-            .main-container { grid-template-columns: 1fr 320px; }
-            .left-sidebar { display: none; }
-        }
-        @media (max-width: 768px) {
-            .main-container { grid-template-columns: 1fr; }
-            .right-sidebar { display: none; }
-        }
+        .post-form-card button:hover { background-color: #1877f2; }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="left-sidebar">
-            <a href="home.html" class="nav-link">🏠 Home</a>
-            <a href="profile.html" class="nav-link">👤 My Profile</a>
-            <a href="settings.html" class="nav-link">⚙️ Settings</a>
-        </div>
 
-        <div class="center-feed">
-            <div id="posts-container">
-                </div>
-        </div>
-
-        <div class="right-sidebar">
-            <div class="profile-summary-card">
-                <h3 id="current-user-username">Your Profile</h3>
+    <header class="top-nav">
+        <div class="top-nav-content">
+            <div class="nav-left">
+                <a href="home.html" class="nav-logo">⚡</a>
+                <nav class="nav-links">
+                    <a href="home.html" class="active">Home</a>
+                    <a href="search.html">Search</a>
+                    <a href="#">Activity</a>
+                    <a href="profile.html">Profile</a>
+                </nav>
             </div>
-            <div class="post-form-card">
-                <h3>Create a New Post</h3>
-                <form id="create-post-form">
-                    <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
-                    <input type="text" id="image-url" placeholder="Optional: Image URL">
-                    <button type="submit">Post</button>
-                </form>
+            <div class="nav-right">
+                <button class="announce-btn" id="announce-btn-open">Announce</button>
+                <img src="https://via.placeholder.com/32" alt="My Profile" class="profile-pic" id="nav-profile-pic">
+            </div>
+        </div>
+    </header>
+
+    <main class="feed-container">
+        <div id="posts-container">
+            </div>
+    </main>
+
+    <div id="create-post-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create Post</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="post-form-card">
+                    <form id="create-post-form">
+                        <textarea id="post-content" placeholder="What's on your mind?" required rows="5"></textarea>
+                        <input type="text" id="image-url" placeholder="Image URL">
+                        <button type="submit">Post</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Your JavaScript is unchanged and does not need to be modified.
-        const createPostForm = document.getElementById('create-post-form');
         const postsContainer = document.getElementById('posts-container');
         const token = localStorage.getItem('jwt_token');
+        const navProfilePic = document.getElementById('nav-profile-pic');
+        
+        // Modal Elements
+        const createPostModal = document.getElementById('create-post-modal');
+        const openModalBtn = document.getElementById('announce-btn-open');
+        const closeModalBtn = document.getElementById('modal-close-btn');
+        const createPostForm = document.getElementById('create-post-form');
+
+        // Modal Event Listeners
+        openModalBtn.addEventListener('click', () => {
+            createPostModal.style.display = 'flex';
+        });
+        closeModalBtn.addEventListener('click', () => {
+            createPostModal.style.display = 'none';
+        });
+        createPostModal.addEventListener('click', (event) => {
+            if (event.target === createPostModal) {
+                createPostModal.style.display = 'none';
+            }
+        });
+        
+        navProfilePic.addEventListener('click', () => {
+             // TODO: This should ideally link to the current user's profile
+             window.location.href = 'profile.html';
+        });
+
+        // --- SVG ICONS ---
+        const heartIcon = `
+            <svg aria-label="Like" fill="currentColor" role="img" viewBox="0 0 24 24">
+                <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-6.12 8.424-3.468 3.465-6.12 6.12-6.12 6.12s-2.652-2.655-6.12-6.12C-2.652 14.08.001 12.192.001 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.118-1.763a4.21 4.21 0 0 1 3.675-1.941z"></path>
+            </svg>`;
+        const commentIcon = `<svg aria-label="Comment" fill="currentColor" role="img" viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z"></path></svg>`;
+        const retweetIcon = `<svg aria-label="Repost" fill="currentColor" viewBox="0 0 24 24"><path d="M23.77 15.67c-.292-.293-.767-.293-1.06 0l-2.22 2.22V7.65c0-2.068-1.683-3.75-3.75-3.75h-5.85c-.414 0-.75.336-.75.75s.336.75.75.75h5.85c1.24 0 2.25 1.01 2.25 2.25v10.24l-2.22-2.22c-.293-.293-.768-.293-1.06 0s-.294.768 0 1.06l3.5 3.5c.145.147.337.22.53.22s.383-.072.53-.22l3.5-3.5c.294-.293.294-.767 0-1.06zm-10.66 3.28H7.26c-1.24 0-2.25-1.01-2.25-2.25V6.46l2.22 2.22c.148.147.34.22.532.22s.384-.073.53-.22c.293-.293.293-.768 0-1.06l-3.5-3.5c-.145-.147-.337-.22-.53-.22s-.383.072-.53.22l-3.5 3.5c-.294.293-.294.767 0 1.06s.768.293 1.06 0l2.22-2.22v10.24c0 2.068 1.683 3.75 3.75 3.75h5.85c.414 0 .75-.336.75-.75s-.337-.75-.75-.75z"></path></svg>`;
+        const shareIcon = `<svg aria-label="Share" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 3.001a.998.998 0 0 1 .998.998v8.662l3.79-3.79a.999.999 0 1 1 1.414 1.414l-5.495 5.495a1 1 0 0 1-1.414 0L6.2 10.285a.999.999 0 1 1 1.414-1.414l3.79 3.79V4a.998.998 0 0 1 .599-.913.997.997 0 0 1 1.001.913Zm-10.5 8.5H1.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h21a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-6.995v1.5a2.5 2.5 0 0 1-5.01 0V11.5Z"></path></svg>`;
+
+        
+        function displayPost(post, prepend = false) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post-card');
+
+            const postDate = new Date(post.createdAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : '';
+            const avatarUrl = post.authorAvatarUrl ? post.authorAvatarUrl : 'https://via.placeholder.com/42';
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <img src="${avatarUrl}" alt="${post.authorUsername}'s profile pic" class="profile-pic">
+                    <div class="post-author-info">
+                        <a href="profile.html?username=${post.authorUsername}" class="post-author-name">${post.authorUsername}</a>
+                        <span class="post-meta">#${post.authorUsername} · ${postDate}</span>
+                    </div>
+                    <span class="post-options">...</span>
+                </div>
+                <div class="post-content">
+                    <p>${post.content}</p>
+                    ${imageHtml}
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn">
+                        ${heartIcon} <span>${post.likesCount}</span>
+                    </button>
+                    <button class="action-btn">
+                        ${commentIcon} <span>${post.commentsCount}</span>
+                    </button>
+                    <button class="action-btn">${retweetIcon} <span>0</span></button>
+                    <button class="action-btn">${shareIcon}</button>
+                </div>`;
+            
+            const likeBtn = postElement.querySelector('.like-btn');
+            likeBtn.addEventListener('click', () => {
+                likeBtn.classList.toggle('liked');
+            });
+            
+            if (prepend) { 
+                postsContainer.prepend(postElement); 
+            } else { 
+                postsContainer.appendChild(postElement); 
+            }
+        }
 
         async function fetchPosts() {
-            if (!token) { window.location.href = 'index.html'; return; }
+            if (!token) { 
+                window.location.href = 'index.html'; 
+                return; 
+            }
             try {
-                const response = await fetch('http://localhost:8080/api/posts', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (response.status === 401) {
+                const response = await fetch('http://localhost:8080/api/posts', { headers: { 'Authorization': 'Bearer ' + token } });
+                
+                if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem('jwt_token');
+                    alert('Your session has expired. Please log in again.');
                     window.location.href = 'index.html';
                     return;
                 }
                 if (!response.ok) throw new Error('Failed to fetch posts.');
+                
                 const posts = await response.json();
                 postsContainer.innerHTML = '';
                 posts.forEach(post => displayPost(post));
-            } catch (error) { alert(error.message); }
-        }
 
-        function displayPost(post, prepend = false) {
-            const postElement = document.createElement('div');
-            postElement.classList.add('post');
-            const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image">` : '';
-            const postDate = new Date(post.createdAt).toLocaleString();
-            postElement.innerHTML = `
-                <div class="post-header">
-                    <div class="post-author"><a href="profile.html?username=${post.authorUsername}">${post.authorUsername}</a></div>
-                    <div class="post-date">${postDate}</div>
-                </div>
-                ${imageHtml}
-                <div class="post-content"><p>${post.content}</p></div>
-                <div class="post-footer">
-                    <span>Likes: ${post.likesCount}</span> | <span>Comments: ${post.commentsCount}</span>
-                </div>`;
-            if (prepend) { postsContainer.prepend(postElement); }
-            else { postsContainer.appendChild(postElement); }
+            } catch (error) { 
+                console.error('Error fetching posts:', error);
+                alert(error.message); 
+            }
         }
-
+        
         createPostForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const content = document.getElementById('post-content').value;
@@ -173,10 +409,15 @@
                     body: JSON.stringify({ content, imageUrl })
                 });
                 if (!response.ok) throw new Error('Failed to create post.');
+                
                 const newPost = await response.json();
-                displayPost(newPost, true);
-                createPostForm.reset();
-            } catch (error) { alert(error.message); }
+                displayPost(newPost, true); // Add new post to the top of the feed
+                createPostForm.reset(); // Clear the form
+                createPostModal.style.display = 'none'; // Close the modal
+                
+            } catch (error) { 
+                alert(error.message); 
+            }
         });
 
         window.onload = fetchPosts;
