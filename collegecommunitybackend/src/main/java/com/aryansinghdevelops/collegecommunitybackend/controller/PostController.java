@@ -2,6 +2,7 @@ package com.aryansinghdevelops.collegecommunitybackend.controller;
 
 import com.aryansinghdevelops.collegecommunitybackend.dto.PostDto;
 import com.aryansinghdevelops.collegecommunitybackend.model.User;
+import com.aryansinghdevelops.collegecommunitybackend.model.VoteType;
 import com.aryansinghdevelops.collegecommunitybackend.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
 
-    // Inject the PostService instead of the repository
     private final PostService postService;
 
-    // This endpoint now uses the service to create the post
     @PostMapping
     public ResponseEntity<PostDto.PostResponse> createPost(
             @RequestBody PostDto.PostCreateRequest request,
@@ -29,10 +28,24 @@ public class PostController {
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
-    // New endpoint to get all posts
     @GetMapping
-    public ResponseEntity<List<PostDto.PostResponse>> getAllPosts() {
-        List<PostDto.PostResponse> posts = postService.getAllPosts();
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<List<PostDto.PostResponse>> getAllPosts(@AuthenticationPrincipal User currentUser) {
+        // We pass currentUser so the service can check which posts they have already voted on
+        return ResponseEntity.ok(postService.getAllPosts(currentUser));
+    }
+
+    // NEW: Endpoint for Upvoting/Downvoting
+    @PostMapping("/{postId}/vote")
+    public ResponseEntity<Void> votePost(
+            @PathVariable Long postId,
+            @RequestBody PostDto.VoteRequest request,
+            @AuthenticationPrincipal User currentUser) {
+
+        // Convert string request to Enum
+        VoteType type = VoteType.valueOf(request.getVoteType());
+
+        postService.vote(postId, type, currentUser);
+
+        return ResponseEntity.ok().build();
     }
 }

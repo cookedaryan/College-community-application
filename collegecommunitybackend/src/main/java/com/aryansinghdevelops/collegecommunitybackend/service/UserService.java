@@ -40,11 +40,14 @@ public class UserService {
 
         ProfileResponseDto response = new ProfileResponseDto();
         response.setUsername(profileUser.getDisplayName());
-        response.setAvatarUrl(profileUser.getAvatarUrl()); // <-- ADDED
+        response.setAvatarUrl(profileUser.getAvatarUrl());
         response.setPostCount(profileUser.getPosts().size());
         response.setFollowerCount(profileUser.getFollowers().size());
         response.setFollowingCount(profileUser.getFollowing().size());
-        response.setPosts(postService.getPostsByUser(profileUser));
+
+        // FIXED: Now passing 'currentUser' as the second argument
+        response.setPosts(postService.getPostsByUser(profileUser, currentUser));
+
         response.setFollowing(profileUser.getFollowers().contains(currentUser));
 
         return response;

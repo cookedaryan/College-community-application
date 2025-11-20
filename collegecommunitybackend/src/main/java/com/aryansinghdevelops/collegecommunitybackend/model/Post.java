@@ -24,7 +24,7 @@ public class Post {
     @Column(columnDefinition = "TEXT") // <-- ADD THIS ANNOTATION
     private String imageUrl;
 
-    private Integer likesCount = 0;
+    private Integer score = 0;
     private Integer commentsCount = 0;
 
     @CreationTimestamp
