@@ -1,13 +1,16 @@
 package com.aryansinghdevelops.collegecommunitybackend.repository;
 
 import com.aryansinghdevelops.collegecommunitybackend.model.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
-import java.util.UUID; // <-- Import UUID
+import java.util.UUID;
 
-public interface PostRepository extends JpaRepository<Post, Long> { // Post ID is still Long
+public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // Change the parameter type for the user's ID to UUID
-    List<Post> findByUserIdOrderByCreatedAtDesc(UUID userId);
-    List<Post> findAllByOrderByCreatedAtDesc();
+    // CHANGED: Returns a Page instead of a List, accepts Pageable
+    Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    // Also update this one for the profile page
+    Page<Post> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 }

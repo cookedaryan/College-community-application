@@ -9,4 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDto {
     private String username;
+    private String avatarUrl;
+    private String bio;
+    private String skills;
+    // You can add gender/dob here if you want to display them publicly too
 }

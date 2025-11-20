@@ -33,6 +33,16 @@ public class User implements UserDetails {
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    private String gender; // e.g., "Male", "Female", "Other"
+
+    private java.time.LocalDate dateOfBirth;
+
+    @Column(columnDefinition = "TEXT")
+    private String skills; // Stored as "Java,Python,Spring Boot"
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

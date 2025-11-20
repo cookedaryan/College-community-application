@@ -23,29 +23,27 @@ public class PostController {
     public ResponseEntity<PostDto.PostResponse> createPost(
             @RequestBody PostDto.PostCreateRequest request,
             @AuthenticationPrincipal User currentUser) {
-
         PostDto.PostResponse createdPost = postService.createPost(request, currentUser);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
+    // --- UPDATED ENDPOINT ---
     @GetMapping
-    public ResponseEntity<List<PostDto.PostResponse>> getAllPosts(@AuthenticationPrincipal User currentUser) {
-        // We pass currentUser so the service can check which posts they have already voted on
-        return ResponseEntity.ok(postService.getAllPosts(currentUser));
+    public ResponseEntity<List<PostDto.PostResponse>> getAllPosts(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(defaultValue = "0") int page, // Start at page 0
+            @RequestParam(defaultValue = "10") int size // Load 10 at a time
+    ) {
+        return ResponseEntity.ok(postService.getAllPosts(page, size, currentUser));
     }
 
-    // NEW: Endpoint for Upvoting/Downvoting
     @PostMapping("/{postId}/vote")
     public ResponseEntity<Void> votePost(
             @PathVariable Long postId,
             @RequestBody PostDto.VoteRequest request,
             @AuthenticationPrincipal User currentUser) {
-
-        // Convert string request to Enum
         VoteType type = VoteType.valueOf(request.getVoteType());
-
         postService.vote(postId, type, currentUser);
-
         return ResponseEntity.ok().build();
     }
 }

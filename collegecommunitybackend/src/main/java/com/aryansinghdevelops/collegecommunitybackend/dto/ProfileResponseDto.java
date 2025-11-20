@@ -12,4 +12,8 @@ public class ProfileResponseDto {
     private int followingCount;
     private boolean isFollowing;
     private List<PostDto.PostResponse> posts;
+    private String bio;
+    private String gender;
+    private java.time.LocalDate dateOfBirth;
+    private String skills;
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Home Feed</title>
     <style>
         /* --- Base Styles --- */
@@ -11,6 +11,7 @@
             background-color: #f0f2f5;
             margin: 0;
             color: #1c1e21;
+            overflow-x: hidden;
         }
 
         /* --- Top Navigation Bar --- */
@@ -23,24 +24,93 @@
             z-index: 1000;
         }
         .top-nav-content {
-            max-width: 975px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
         }
-        .nav-left { display: flex; align-items: center; gap: 25px; }
+        .nav-left { display: flex; align-items: center; gap: 15px; }
+        
+        /* Hamburger Menu (Mobile Only) */
+        .mobile-menu-btn {
+            display: none;
+            background: none; border: none; font-size: 24px; cursor: pointer; padding: 0;
+        }
+
         .nav-logo { font-size: 24px; font-weight: bold; color: #007bff; text-decoration: none; }
-        .nav-links { display: flex; gap: 20px; }
-        .nav-links a { text-decoration: none; color: #555; font-weight: 600; font-size: 16px; padding: 8px 12px; border-radius: 6px; }
-        .nav-links a.active, .nav-links a:hover { background-color: #f0f2f5; color: #000; }
         .nav-right { display: flex; align-items: center; gap: 15px; }
         .announce-btn { background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
         .profile-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
+        /* --- Main Layout --- */
+        .main-container {
+            display: grid;
+            grid-template-columns: 260px 1fr; /* Sidebar | Feed */
+            gap: 30px;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            align-items: start;
+        }
+
+        /* --- Left Sidebar (Navigation) --- */
+        .left-sidebar {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 15px;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            z-index: 900;
+        }
+        
+        /* Sidebar Header (Mobile Only) */
+        .sidebar-mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .sidebar-title { font-weight: bold; font-size: 18px; }
+        .sidebar-close { font-size: 24px; cursor: pointer; background: none; border: none; }
+
+        /* Navigation Links */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: #1c1e21;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #f0f2f5;
+            color: #007bff;
+        }
+        .nav-item.logout:hover {
+            background-color: #fff0f0;
+            color: #dc3545;
+        }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; stroke: none; }
+        
+        /* Special stroke based icon for logout */
+        .nav-item.logout svg { fill: none; stroke: currentColor; stroke-width: 2; }
+
+        .divider { height: 1px; background: #dbdbdb; margin: 10px 0; }
+
         /* --- Feed Container --- */
-        .feed-container { max-width: 650px; margin: 30px auto; padding: 0 20px; }
+        .feed-container { max-width: 600px; margin: 0 auto; width: 100%; }
 
         /* --- Post Card Styles --- */
         .post-card {
@@ -58,46 +128,17 @@
         .post-meta { font-size: 14px; color: #65676b; }
         .post-options { margin-left: auto; font-weight: bold; cursor: pointer; }
         
-        .post-content { padding: 4px 16px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
-        .post-image { width: 100%; margin-top: 12px; }
+        .post-content { padding: 4px 16px; font-size: 16px; line-height: 1.5; word-wrap: break-word; }
+        .post-image { width: 100%; margin-top: 12px; display: block; }
         
         /* Text-Only Post Style */
         .post-text-only .post-content p { font-size: 20px; line-height: 1.5; padding: 10px 0; }
 
         /* --- Action Bar Styles --- */
-        .post-actions {
-            display: flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-top: 1px solid #f0f2f5;
-            margin-top: 12px;
-        }
+        .post-actions { display: flex; align-items: center; padding: 8px 16px; border-top: 1px solid #f0f2f5; margin-top: 12px; }
         
-        .vote-group {
-            display: flex;
-            align-items: center;
-            background-color: #f0f2f5;
-            border-radius: 20px;
-            padding: 4px;
-            margin-right: 15px;
-        }
-        
-        .action-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: #65676b;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-        
+        .vote-group { display: flex; align-items: center; background-color: #f0f2f5; border-radius: 20px; padding: 4px; margin-right: 15px; }
+        .action-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600; color: #65676b; padding: 8px; border-radius: 50%; transition: all 0.2s; }
         .vote-score { font-weight: 700; font-size: 14px; color: #1c1e21; margin: 0 8px; min-width: 15px; text-align: center; }
         .action-btn:hover { background-color: rgba(0,0,0,0.05); }
         .action-btn svg { width: 22px; height: 22px; stroke-width: 2; }
@@ -108,46 +149,70 @@
         .downvote-btn.active svg { stroke: #7193ff; fill: #7193ff; }
         .downvote-btn.active { color: #7193ff; background-color: rgba(113, 147, 255, 0.1); }
 
-        /* --- Comments Section Styles --- */
-        .comments-section {
-            display: none; /* Hidden by default */
-            border-top: 1px solid #f0f2f5;
-            padding: 10px 16px;
-            background-color: #fafafa;
-        }
-        .comment-item { margin-bottom: 12px; font-size: 14px; }
-        .comment-main { display: flex; gap: 10px; }
-        .comment-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
-        .comment-body {
-            background-color: #f0f2f5;
-            padding: 8px 12px;
-            border-radius: 12px;
-            flex-grow: 1;
-        }
-        .comment-author { font-weight: bold; font-size: 13px; display: block; }
-        .comment-text { margin: 2px 0 0 0; }
+        /* --- SKELETON LOADER STYLES --- */
+        .skeleton-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; padding: 16px; }
+        .skeleton-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .skeleton-avatar { width: 42px; height: 42px; border-radius: 50%; background: #eee; }
+        .skeleton-info { display: flex; flex-direction: column; gap: 6px; margin-left: 12px; flex-grow: 1; }
+        .skeleton-line { height: 12px; background: #eee; border-radius: 4px; }
+        .skeleton-line.short { width: 30%; }
+        .skeleton-line.long { width: 60%; }
+        .skeleton-body { height: 150px; background: #eee; border-radius: 4px; margin-top: 15px; }
+        .skeleton-avatar, .skeleton-line, .skeleton-body { animation: shimmer 1.5s infinite linear; background: linear-gradient(to right, #eee 4%, #f5f5f5 25%, #eee 36%); background-size: 1000px 100%; }
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        #sentinel { height: 10px; }
+
+        /* --- COMMENT SIDEBAR & STYLES --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        .comment-sidebar { position: fixed; top: 0; right: -100%; width: 400px; height: 100%; background: white; z-index: 2001; box-shadow: -2px 0 10px rgba(0,0,0,0.1); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        .comment-sidebar.active { right: 0; }
         
-        .reply-btn { font-size: 12px; color: #65676b; cursor: pointer; margin-left: 44px; margin-top: 2px; }
-        .reply-btn:hover { text-decoration: underline; }
-        .replies-list { margin-left: 40px; border-left: 2px solid #e4e6eb; padding-left: 10px; margin-top: 8px; }
+        .sidebar-header { padding: 15px 20px; border-bottom: 1px solid #dbdbdb; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 18px; }
+        .sidebar-close-btn { background: none; border: none; font-size: 28px; cursor: pointer; padding: 0; line-height: 1; }
+        .sidebar-body { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .loading-spinner { text-align: center; color: #65676b; margin-top: 20px; }
+        
+        .sidebar-footer { padding: 15px; border-top: 1px solid #dbdbdb; background: white; }
+        .comment-input-container { display: flex; align-items: center; border: 1px solid #dbdbdb; border-radius: 25px; padding: 5px 15px; background: #f0f2f5; }
+        .sidebar-input { flex-grow: 1; border: none; background: transparent; padding: 10px; outline: none; font-size: 14px; }
+        .sidebar-send-btn { color: #0095f6; font-weight: bold; border: none; background: none; cursor: pointer; padding: 5px; }
+        .sidebar-send-btn:disabled { opacity: 0.5; cursor: default; }
+        .reply-badge { font-size: 12px; color: #65676b; margin-bottom: 5px; display: none; justify-content: space-between; padding: 0 5px; }
+        .reply-cancel { color: #ed4956; cursor: pointer; font-weight: bold; }
+        
+        .comment-item { margin-bottom: 12px; }
+        .comment-display { display: flex; gap: 10px; align-items: flex-start; }
+        .comment-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .comment-content-wrapper { display: flex; flex-direction: column; max-width: 88%; }
+        .comment-bubble { background: #f0f2f5; padding: 8px 12px; border-radius: 18px; position: relative; }
+        .comment-author { font-weight: 700; font-size: 13px; margin-right: 5px; color: #1c1e21; }
+        .comment-text { font-size: 14px; line-height: 1.4; margin: 0; color: #050505; }
+        .comment-actions { margin-top: 2px; margin-left: 12px; font-size: 12px; color: #65676b; display: flex; gap: 15px; font-weight: 600; }
+        .reply-action { cursor: pointer; }
+        .reply-action:hover { text-decoration: underline; }
+        .replies-container { margin-left: 16px; padding-left: 12px; border-left: 2px solid #e0e0e0; margin-top: 6px; }
 
-        .comment-input-area { display: flex; gap: 10px; margin-top: 15px; }
-        .comment-input { flex-grow: 1; padding: 8px; border: 1px solid #dbdbdb; border-radius: 20px; font-size: 14px; outline: none; }
-        .send-comment-btn { background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer; }
-        .replying-to-badge { font-size: 12px; color: #0095f6; margin-bottom: 5px; display: none; cursor: pointer; }
+        /* --- Create Post Modal --- */
+        .modal-overlay-post { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .modal-content { background-color: white; border-radius: 12px; width: 500px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 90vh; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #dbdbdb; }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .post-form-card textarea { width: 100%; min-height: 150px; padding: 10px; border: none; outline: none; font-size: 16px; resize: none; font-family: inherit; }
+        .post-form-card input[type="text"] { width: 100%; padding: 10px; border: 1px solid #dbdbdb; border-radius: 6px; margin-bottom: 15px; }
+        .post-form-card button { background-color: #0095f6; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 15px; }
 
-        /* --- Modal Styles --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background-color: white; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #dbdbdb; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close-btn { background: none; border: none; font-size: 28px; font-weight: 300; cursor: pointer; color: #65676b; }
-        .modal-body { padding: 20px; }
-        .post-form-card { padding: 0; }
-        .post-form-card textarea { width: 100%; min-height: 120px; padding: 10px; border-radius: 5px; border: 1px solid #dbdbdb; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; resize: vertical; }
-        .post-form-card input[type="text"] { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #dbdbdb; margin-bottom: 15px; box-sizing: border-box; font-size: 14px; }
-        .post-form-card button { background-color: #0095f6; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; }
-        .post-form-card button:hover { background-color: #1877f2; }
+        /* --- Mobile Responsive --- */
+        @media (max-width: 900px) {
+            .main-container { display: block; }
+            .mobile-menu-btn { display: block; }
+            .left-sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; margin: 0; border-radius: 0; transition: left 0.3s ease; z-index: 2001; padding: 20px; overflow-y: auto; }
+            .left-sidebar.active { left: 0; }
+            .sidebar-mobile-header { display: flex; }
+            .comment-sidebar { width: 100%; }
+        }
+        .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; }
+        .nav-overlay.active { display: block; opacity: 1; }
     </style>
 </head>
 <body>
@@ -155,38 +220,84 @@
     <header class="top-nav">
         <div class="top-nav-content">
             <div class="nav-left">
-                <a href="home.html" class="nav-logo">⚡</a>
-                <nav class="nav-links">
-                    <a href="home.html" class="active">Home</a>
-                    <a href="search.html">Search</a>
-                    <a href="#">Activity</a>
-                    <a href="profile.html">Profile</a>
-                </nav>
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <a href="home.html" class="nav-logo">⚡ CollegeHub</a>
             </div>
             <div class="nav-right">
                 <button class="announce-btn" id="announce-btn-open">Announce</button>
-                <img src="https://th.bing.com/th/id/OIP.Pdl4XwubKnUK09v5u-IVOwHaHa?w=196&h=196&c=7&r=0&o=7&dpr=1.8&pid=1.7&rm=3" alt="My Profile" class="profile-pic" id="nav-profile-pic">
+                <img src="https://via.placeholder.com/32" alt="My Profile" class="profile-pic" id="nav-profile-pic">
             </div>
         </div>
     </header>
 
-    <main class="feed-container">
-        <div id="posts-container">
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main class="main-container">
+        
+        <div class="left-sidebar" id="left-sidebar">
+            <div class="sidebar-mobile-header">
+                <span class="sidebar-title">Menu</span>
+                <button class="sidebar-close" id="nav-close-btn">&times;</button>
             </div>
+            <a href="home.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Home</a>
+            <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> My Profile</a>
+            <div class="divider"></div>
+            <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Clubs</a>
+            <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg> Events</a>
+            <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg> Marketplace</a>
+            <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Peerly</a>
+            <div class="divider"></div>
+            <a href="settings.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92 3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Settings</a>
+            
+            <div class="divider"></div>
+            <a href="#" class="nav-item logout" id="logout-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
+            </a>
+        </div>
+
+        <div class="feed-container">
+            <div id="posts-container"></div>
+            <div id="sentinel"></div>
+            <div id="skeleton-container"></div>
+        </div>
     </main>
 
-    <div id="create-post-modal" class="modal-overlay">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="comment-sidebar" id="comment-sidebar">
+         <div class="sidebar-header">
+            <span>Comments</span>
+            <button class="sidebar-close-btn" id="sidebar-close-btn">&times;</button>
+        </div>
+        <div class="sidebar-body" id="sidebar-body">
+            <div class="loading-spinner">Loading...</div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="reply-badge" id="reply-badge">
+                <span id="replying-to-text">Replying to...</span>
+                <span class="reply-cancel" onclick="cancelReply()">✕</span>
+            </div>
+            <div class="comment-input-container">
+                <input type="text" class="sidebar-input" id="sidebar-input" placeholder="Add a comment...">
+                <button class="sidebar-send-btn" id="sidebar-send-btn">Post</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-post-modal" class="modal-overlay-post">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Create Post</h2>
+                <div style="font-weight:bold; font-size: 16px;">Create new post</div>
                 <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="post-form-card">
                     <form id="create-post-form">
-                        <textarea id="post-content" placeholder="What's on your mind?" required rows="5"></textarea>
-                        <input type="text" id="image-url" placeholder="Image URL">
-                        <button type="submit">Post</button>
+                        <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
+                        <input type="text" id="image-url" placeholder="Image URL (Optional)">
+                        <button type="submit">Share</button>
                     </form>
                 </div>
             </div>
@@ -194,20 +305,63 @@
     </div>
 
     <script>
+        // --- LOGOUT LOGIC ---
+        const logoutBtn = document.getElementById('logout-btn');
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('jwt_token');
+                window.location.href = 'index.html';
+            });
+        }
+
         const postsContainer = document.getElementById('posts-container');
+        const skeletonContainer = document.getElementById('skeleton-container');
+        const sentinel = document.getElementById('sentinel');
         const token = localStorage.getItem('jwt_token');
-        const navProfilePic = document.getElementById('nav-profile-pic');
         
-        // Modal Elements
+        // Mobile Nav Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const leftSidebar = document.getElementById('left-sidebar');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navCloseBtn = document.getElementById('nav-close-btn');
+
+        function openMobileNav() { leftSidebar.classList.add('active'); navOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeMobileNav() { leftSidebar.classList.remove('active'); navOverlay.classList.remove('active'); document.body.style.overflow = ''; }
+        mobileMenuBtn.addEventListener('click', openMobileNav);
+        navCloseBtn.addEventListener('click', closeMobileNav);
+        navOverlay.addEventListener('click', closeMobileNav);
+
+        // Elements
+        const navProfilePic = document.getElementById('nav-profile-pic');
         const createPostModal = document.getElementById('create-post-modal');
         const openModalBtn = document.getElementById('announce-btn-open');
         const closeModalBtn = document.getElementById('modal-close-btn');
         const createPostForm = document.getElementById('create-post-form');
+        const commentSidebar = document.getElementById('comment-sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+        const sidebarBody = document.getElementById('sidebar-body');
+        const sidebarInput = document.getElementById('sidebar-input');
+        const sidebarSendBtn = document.getElementById('sidebar-send-btn');
+        const replyBadge = document.getElementById('reply-badge');
+        const replyingToText = document.getElementById('replying-to-text');
+        
+        let currentOpenPostId = null;
+        let currentReplyParentId = null;
+        let currentPage = 0;
+        const pageSize = 10;
+        let isLoading = false;
+        let hasMore = true;
 
         openModalBtn.addEventListener('click', () => createPostModal.style.display = 'flex');
         closeModalBtn.addEventListener('click', () => createPostModal.style.display = 'none');
         createPostModal.addEventListener('click', (e) => { if(e.target === createPostModal) createPostModal.style.display = 'none'; });
         navProfilePic.addEventListener('click', () => window.location.href = 'profile.html');
+        sidebarCloseBtn.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        sidebarSendBtn.addEventListener('click', () => submitComment());
+        sidebarInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') submitComment(); });
 
         // Icons
         const upArrowIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`;
@@ -215,35 +369,45 @@
         const commentIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
         const shareIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
 
+        // Helper: Time Ago
+        function timeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const seconds = Math.floor((now - date) / 1000);
+            let interval = Math.floor(seconds / 31536000);
+            if (interval >= 1) return interval + "y";
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return interval + "mo";
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return interval + "d";
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return interval + "h";
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return interval + "m";
+            return "now";
+        }
+
+        // Skeletons
+        function renderSkeletons(count = 3) {
+            let html = '';
+            for(let i=0; i<count; i++) { html += `<div class="skeleton-card"><div class="skeleton-header"><div class="skeleton-avatar"></div><div class="skeleton-info"><div class="skeleton-line short"></div><div class="skeleton-line long"></div></div></div><div class="skeleton-body"></div></div>`; }
+            skeletonContainer.innerHTML = html;
+        }
+        function clearSkeletons() { skeletonContainer.innerHTML = ''; }
+
         function displayPost(post, prepend = false) {
             const postElement = document.createElement('div');
             postElement.classList.add('post-card');
-            
             const postDate = new Date(post.createdAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
             const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : '';
             const avatarUrl = post.authorAvatarUrl ? post.authorAvatarUrl : 'https://via.placeholder.com/42';
-            
             const upActive = post.currentUserVote === 1 ? 'active' : '';
             const downActive = post.currentUserVote === -1 ? 'active' : '';
-
-            let contentHtml = '';
-            if (post.imageUrl) {
-                contentHtml = `
-                    <div class="post-content">
-                        <p>${post.content}</p>
-                        <img src="${post.imageUrl}" alt="Post image" class="post-image">
-                    </div>`;
-            } else {
-                postElement.classList.add('post-text-only');
-                contentHtml = `
-                    <div class="post-content">
-                        <p>${post.content}</p>
-                    </div>`;
-            }
+            let contentHtml = post.imageUrl ? `<div class="post-content"><p>${post.content}</p><img src="${post.imageUrl}" alt="Post image" class="post-image"></div>` : (() => { postElement.classList.add('post-text-only'); return `<div class="post-content"><p>${post.content}</p></div>`; })();
 
             postElement.innerHTML = `
                 <div class="post-header">
-                    <img src="${avatarUrl}" alt="${post.authorUsername}'s profile pic" class="profile-pic">
+                    <img src="${avatarUrl}" alt="${post.authorUsername}'s profile pic" class="profile-pic" onclick="window.location.href='profile.html?username=${post.authorUsername}'">
                     <div class="post-author-info">
                         <a href="profile.html?username=${post.authorUsername}" class="post-author-name">${post.authorUsername}</a>
                         <span class="post-meta">#${post.authorUsername} · ${postDate}</span>
@@ -253,42 +417,24 @@
                 ${contentHtml}
                 <div class="post-actions">
                     <div class="vote-group">
-                        <button class="action-btn upvote-btn ${upActive}">
-                            ${upArrowIcon}
-                        </button>
+                        <button class="action-btn upvote-btn ${upActive}">${upArrowIcon}</button>
                         <span class="vote-score">${post.score}</span>
-                        <button class="action-btn downvote-btn ${downActive}">
-                            ${downArrowIcon}
-                        </button>
+                        <button class="action-btn downvote-btn ${downActive}">${downArrowIcon}</button>
                     </div>
-                    <button class="action-btn toggle-comments-btn">
-                        ${commentIcon} <span>${post.commentsCount}</span>
+                    <button class="action-btn comment-trigger-btn">
+                        ${commentIcon} <span id="comment-count-${post.id}">${post.commentsCount}</span>
                     </button>
-                    <button class="action-btn" style="margin-left: auto;">
-                        ${shareIcon}
-                    </button>
-                </div>
-                
-                <div class="comments-section" id="comments-${post.id}">
-                    <div class="comment-input-area">
-                        <input type="text" class="comment-input" placeholder="Write a comment..." id="input-${post.id}">
-                        <button class="send-comment-btn" onclick="submitComment(${post.id})">Post</button>
-                    </div>
-                    <div class="replying-to-badge" id="reply-badge-${post.id}" onclick="cancelReply(${post.id})">
-                        Replying to... (click to cancel)
-                    </div>
-                    <div class="comments-list" id="list-${post.id}"></div>
+                    <button class="action-btn" style="margin-left: auto;">${shareIcon}</button>
                 </div>`;
 
-            // Listeners
             const upBtn = postElement.querySelector('.upvote-btn');
             const downBtn = postElement.querySelector('.downvote-btn');
             const scoreEl = postElement.querySelector('.vote-score');
-            const commentBtn = postElement.querySelector('.toggle-comments-btn');
+            const commentBtn = postElement.querySelector('.comment-trigger-btn');
 
             upBtn.addEventListener('click', () => handleVote(post.id, 'UPVOTE', upBtn, downBtn, scoreEl));
             downBtn.addEventListener('click', () => handleVote(post.id, 'DOWNVOTE', downBtn, upBtn, scoreEl));
-            commentBtn.addEventListener('click', () => toggleComments(post.id));
+            commentBtn.addEventListener('click', () => openSidebar(post.id));
 
             if (prepend) postsContainer.prepend(postElement);
             else postsContainer.appendChild(postElement);
@@ -298,7 +444,6 @@
             try {
                 let score = parseInt(scoreEl.textContent);
                 const isRemoving = clickedBtn.classList.contains('active');
-                
                 if (isRemoving) {
                     clickedBtn.classList.remove('active');
                     score += (voteType === 'UPVOTE' ? -1 : 1);
@@ -311,133 +456,116 @@
                     }
                 }
                 scoreEl.textContent = score;
-
-                const response = await fetch(`http://localhost:8080/api/posts/${postId}/vote`, {
+                await fetch(`http://localhost:8080/api/posts/${postId}/vote`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ voteType: voteType })
                 });
-                if (!response.ok) throw new Error('Vote failed');
             } catch (error) { console.error(error); }
         }
 
-        // --- COMMENT LOGIC ---
-        let replyState = {}; 
-
-        async function toggleComments(postId) {
-            const section = document.getElementById(`comments-${postId}`);
-            const list = document.getElementById(`list-${postId}`);
-            
-            if (section.style.display === 'block') {
-                section.style.display = 'none';
-            } else {
-                section.style.display = 'block';
-                if (list.innerHTML === '') {
-                    fetchComments(postId);
-                }
-            }
-        }
-
-        async function fetchComments(postId) {
+        async function openSidebar(postId) {
+            currentOpenPostId = postId;
+            cancelReply();
+            sidebarBody.innerHTML = '<div class="loading-spinner">Loading comments...</div>';
+            sidebarOverlay.classList.add('active');
+            commentSidebar.classList.add('active');
+            document.body.style.overflow = 'hidden';
             try {
-                const res = await fetch(`http://localhost:8080/api/posts/${postId}/comments`, {
-                     headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const res = await fetch(`http://localhost:8080/api/posts/${postId}/comments`, { headers: { 'Authorization': 'Bearer ' + token } });
                 const comments = await res.json();
-                renderComments(postId, comments);
-            } catch (e) { console.error(e); }
+                renderComments(comments);
+            } catch (e) { sidebarBody.innerHTML = '<div style="padding:20px; text-align:center;">Failed to load comments.</div>'; }
         }
 
-        function renderComments(postId, comments) {
-            const list = document.getElementById(`list-${postId}`);
-            list.innerHTML = comments.map(c => buildCommentHtml(postId, c)).join('');
+        function closeSidebar() {
+            sidebarOverlay.classList.remove('active');
+            commentSidebar.classList.remove('active');
+            document.body.style.overflow = '';
+            currentOpenPostId = null;
         }
 
-        function buildCommentHtml(postId, comment) {
-            const avatar = comment.authorAvatarUrl || 'https://via.placeholder.com/24';
+        function renderComments(comments) {
+            if (comments.length === 0) { sidebarBody.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">No comments yet. Be the first!</div>'; return; }
+            sidebarBody.innerHTML = comments.map(c => buildCommentHtml(c)).join('');
+        }
+
+        function buildCommentHtml(comment) {
+            const avatar = comment.authorAvatarUrl || 'https://via.placeholder.com/32';
+            const timeString = timeAgo(comment.createdAt);
             let repliesHtml = '';
-            if (comment.replies && comment.replies.length > 0) {
-                repliesHtml = `<div class="replies-list">${comment.replies.map(r => buildCommentHtml(postId, r)).join('')}</div>`;
-            }
-            
+            if (comment.replies && comment.replies.length > 0) { repliesHtml = `<div class="replies-container">${comment.replies.map(r => buildCommentHtml(r)).join('')}</div>`; }
             return `
                 <div class="comment-item">
-                    <div class="comment-main">
+                    <div class="comment-display">
                         <img src="${avatar}" class="comment-avatar">
-                        <div class="comment-body">
-                            <span class="comment-author">${comment.authorUsername}</span>
-                            <p class="comment-text">${comment.content}</p>
+                        <div class="comment-content-wrapper">
+                            <div class="comment-bubble">
+                                <span class="comment-author">${comment.authorUsername}</span>
+                                <p class="comment-text">${comment.content}</p>
+                            </div>
+                            <div class="comment-actions">
+                                <span>Like</span>
+                                <span class="reply-action" onclick="setReply(${comment.id}, '${comment.authorUsername}')">Reply</span>
+                                <span>${timeString}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="reply-btn" onclick="setReply(${postId}, ${comment.id}, '${comment.authorUsername}')">Reply</div>
                     ${repliesHtml}
-                </div>
-            `;
+                </div>`;
         }
+        window.setReply = function(commentId, username) { currentReplyParentId = commentId; replyingToText.textContent = `Replying to ${username}`; replyBadge.style.display = 'flex'; sidebarInput.focus(); };
+        window.cancelReply = function() { currentReplyParentId = null; replyBadge.style.display = 'none'; };
 
-        function setReply(postId, commentId, username) {
-            replyState[postId] = commentId;
-            const input = document.getElementById(`input-${postId}`);
-            const badge = document.getElementById(`reply-badge-${postId}`);
-            input.focus();
-            input.placeholder = `Replying to ${username}...`;
-            badge.style.display = 'block';
-        }
-
-        function cancelReply(postId) {
-            delete replyState[postId];
-            const input = document.getElementById(`input-${postId}`);
-            const badge = document.getElementById(`reply-badge-${postId}`);
-            input.placeholder = "Write a comment...";
-            badge.style.display = 'none';
-        }
-
-        // Note: Made this global so it can be called from HTML onclick
-        window.submitComment = async function(postId) {
-            const input = document.getElementById(`input-${postId}`);
-            const content = input.value;
-            if (!content) return;
-
-            const parentId = replyState[postId] || null;
-
+        async function submitComment() {
+            const content = sidebarInput.value.trim();
+            if (!content || !currentOpenPostId) return;
+            sidebarSendBtn.disabled = true;
             try {
-                const res = await fetch(`http://localhost:8080/api/posts/${postId}/comments`, {
+                const res = await fetch(`http://localhost:8080/api/posts/${currentOpenPostId}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ content, parentId })
+                    body: JSON.stringify({ content, parentId: currentReplyParentId })
                 });
-                
                 if (res.ok) {
-                    input.value = '';
-                    cancelReply(postId); 
-                    fetchComments(postId);
+                    sidebarInput.value = '';
+                    cancelReply();
+                    const refreshRes = await fetch(`http://localhost:8080/api/posts/${currentOpenPostId}/comments`, { headers: { 'Authorization': 'Bearer ' + token } });
+                    const comments = await refreshRes.json();
+                    renderComments(comments);
+                    const countSpan = document.getElementById(`comment-count-${currentOpenPostId}`);
+                    if(countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
                 }
             } catch (e) { alert(e.message); }
+            finally { sidebarSendBtn.disabled = false; }
         }
-        
-        // Also need to expose setReply and cancelReply globally
-        window.setReply = setReply;
-        window.cancelReply = cancelReply;
 
         async function fetchPosts() {
+            if (isLoading || !hasMore) return;
             if (!token) { window.location.href = 'index.html'; return; }
+            isLoading = true;
+            if(currentPage === 0) renderSkeletons(5);
             try {
-                const response = await fetch('http://localhost:8080/api/posts', { headers: { 'Authorization': 'Bearer ' + token } });
-                
-                if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('jwt_token');
-                    alert('Your session has expired. Please log in again.');
-                    window.location.href = 'index.html';
-                    return;
-                }
-                if (!response.ok) throw new Error('Failed to fetch posts.');
-                
+                const response = await fetch(`http://localhost:8080/api/posts?page=${currentPage}&size=${pageSize}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                if (response.status === 401) { localStorage.removeItem('jwt_token'); window.location.href = 'index.html'; return; }
                 const posts = await response.json();
-                postsContainer.innerHTML = '';
-                posts.forEach(post => displayPost(post));
-            } catch (error) { console.error(error); alert(error.message); }
+                if(currentPage === 0) clearSkeletons();
+                if (posts.length < pageSize) hasMore = false;
+                if (posts.length > 0) {
+                    posts.forEach(post => displayPost(post));
+                    currentPage++;
+                } else if (currentPage === 0) {
+                    postsContainer.innerHTML = '<p style="text-align:center; padding:20px;">No posts yet.</p>';
+                }
+            } catch (error) { console.error(error); }
+            finally { isLoading = false; }
         }
         
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore) fetchPosts();
+        }, { rootMargin: '200px' });
+        observer.observe(sentinel);
+
         createPostForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const content = document.getElementById('post-content').value;
@@ -448,16 +576,13 @@
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ content, imageUrl })
                 });
-                if (!response.ok) throw new Error('Failed to create post.');
-                
+                if (!response.ok) throw new Error('Failed');
                 const newPost = await response.json();
                 displayPost(newPost, true);
                 createPostForm.reset();
                 createPostModal.style.display = 'none';
             } catch (error) { alert(error.message); }
         });
-
-        window.onload = fetchPosts;
     </script>
 </body>
 </html>

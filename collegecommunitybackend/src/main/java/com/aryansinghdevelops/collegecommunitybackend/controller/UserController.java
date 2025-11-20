@@ -1,6 +1,7 @@
 package com.aryansinghdevelops.collegecommunitybackend.controller;
 
 import com.aryansinghdevelops.collegecommunitybackend.dto.ProfileResponseDto;
+import com.aryansinghdevelops.collegecommunitybackend.dto.UpdateProfileRequest; // <-- IMPORT ADDED
 import com.aryansinghdevelops.collegecommunitybackend.dto.UserDto;
 import com.aryansinghdevelops.collegecommunitybackend.model.User;
 import com.aryansinghdevelops.collegecommunitybackend.service.UserService;
@@ -18,7 +19,19 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(new UserDto(currentUser.getDisplayName()));
+        return ResponseEntity.ok(new UserDto(
+                currentUser.getDisplayName(),
+                currentUser.getAvatarUrl(),
+                currentUser.getBio(),
+                currentUser.getSkills()
+        ));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserDto> updateProfile(
+            @RequestBody UpdateProfileRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.updateProfile(currentUser, request));
     }
 
     @GetMapping("/{username}/profile")

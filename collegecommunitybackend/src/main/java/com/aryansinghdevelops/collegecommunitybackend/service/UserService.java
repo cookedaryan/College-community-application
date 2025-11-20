@@ -1,6 +1,8 @@
 package com.aryansinghdevelops.collegecommunitybackend.service;
 
 import com.aryansinghdevelops.collegecommunitybackend.dto.ProfileResponseDto;
+import com.aryansinghdevelops.collegecommunitybackend.dto.UpdateProfileRequest; // <-- IMPORT ADDED
+import com.aryansinghdevelops.collegecommunitybackend.dto.UserDto;
 import com.aryansinghdevelops.collegecommunitybackend.model.User;
 import com.aryansinghdevelops.collegecommunitybackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,20 @@ public class UserService {
         userRepository.save(currentUser);
     }
 
+    @Transactional
+    public UserDto updateProfile(User currentUser, UpdateProfileRequest request) {
+        if (request.getUsername() != null) currentUser.setUsername(request.getUsername());
+        if (request.getBio() != null) currentUser.setBio(request.getBio());
+        if (request.getGender() != null) currentUser.setGender(request.getGender());
+        if (request.getDateOfBirth() != null) currentUser.setDateOfBirth(request.getDateOfBirth());
+        if (request.getSkills() != null) currentUser.setSkills(request.getSkills());
+        if (request.getAvatarUrl() != null) currentUser.setAvatarUrl(request.getAvatarUrl());
+
+        User savedUser = userRepository.save(currentUser);
+
+        return new UserDto(savedUser.getDisplayName(), savedUser.getAvatarUrl(), savedUser.getBio(), savedUser.getSkills());
+    }
+
     @Transactional(readOnly = true)
     public ProfileResponseDto getProfile(String profileUsername, User currentUser) {
         User profileUser = findByUsername(profileUsername);
@@ -41,13 +57,18 @@ public class UserService {
         ProfileResponseDto response = new ProfileResponseDto();
         response.setUsername(profileUser.getDisplayName());
         response.setAvatarUrl(profileUser.getAvatarUrl());
+
+        // Set new fields
+        response.setBio(profileUser.getBio());
+        response.setGender(profileUser.getGender());
+        response.setDateOfBirth(profileUser.getDateOfBirth());
+        response.setSkills(profileUser.getSkills());
+
         response.setPostCount(profileUser.getPosts().size());
         response.setFollowerCount(profileUser.getFollowers().size());
         response.setFollowingCount(profileUser.getFollowing().size());
 
-        // FIXED: Now passing 'currentUser' as the second argument
-        response.setPosts(postService.getPostsByUser(profileUser, currentUser));
-
+        response.setPosts(postService.getPostsByUser(profileUser, 0, 100, currentUser));
         response.setFollowing(profileUser.getFollowers().contains(currentUser));
 
         return response;
