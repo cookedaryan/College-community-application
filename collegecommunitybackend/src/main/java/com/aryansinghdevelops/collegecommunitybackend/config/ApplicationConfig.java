@@ -21,8 +21,18 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return identifier -> {
+            // 1. Try to parse input as a Long (Scholar ID)
+            try {
+                long scholarId = Long.parseLong(identifier);
+                return userRepository.findByScholarId(scholarId)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with Scholar ID: " + scholarId));
+            } catch (NumberFormatException e) {
+                // 2. If not a number, assume it is an Email
+                return userRepository.findByEmail(identifier)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with Email: " + identifier));
+            }
+        };
     }
 
     @Bean

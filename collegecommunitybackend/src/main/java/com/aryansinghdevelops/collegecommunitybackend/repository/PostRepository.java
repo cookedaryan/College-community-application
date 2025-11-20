@@ -8,9 +8,15 @@ import java.util.UUID;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // CHANGED: Returns a Page instead of a List, accepts Pageable
+    // Home Feed (All posts, regardless of club)
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    // Also update this one for the profile page
+    // Profile Feed
     Page<Post> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+
+    // NEW: All Club Posts (Where club_id is NOT NULL)
+    Page<Post> findByClubIdIsNotNullOrderByCreatedAtDesc(Pageable pageable);
+
+    // NEW: Specific Club Posts
+    Page<Post> findByClubIdOrderByCreatedAtDesc(Long clubId, Pageable pageable);
 }

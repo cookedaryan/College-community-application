@@ -33,15 +33,16 @@ public class User implements UserDetails {
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
+    // --- NEW FIELD ---
+    private Long scholarId;
+    // -----------------
+
     @Column(columnDefinition = "TEXT")
     private String bio;
-
-    private String gender; // e.g., "Male", "Female", "Other"
-
+    private String gender;
     private java.time.LocalDate dateOfBirth;
-
     @Column(columnDefinition = "TEXT")
-    private String skills; // Stored as "Java,Python,Spring Boot"
+    private String skills;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -49,25 +50,20 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
-    // Users that this user is following
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_followers",
-            joinColumns = @JoinColumn(name = "follower_id"), // This user's ID
-            inverseJoinColumns = @JoinColumn(name = "following_id") // The ID of the user they are following
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id")
     )
     private Set<User> following = new HashSet<>();
 
-    // Users who are following this user
     @ManyToMany(mappedBy = "following", fetch = FetchType.LAZY)
     private Set<User> followers = new HashSet<>();
 
-    // Custom method to get display name, as getUsername() is used for login (email)
     public String getDisplayName() {
         return this.username;
     }
-
-    // --- UserDetails Methods ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -75,33 +71,20 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password; }
 
     @Override
-    public String getUsername() {
-        // This must return the unique identifier for login, which is email in our case.
-        return email;
-    }
+    public String getUsername() { return email; }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

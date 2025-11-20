@@ -12,5 +12,5 @@ public class UserDto {
     private String avatarUrl;
     private String bio;
     private String skills;
-    // You can add gender/dob here if you want to display them publicly too
+    private String role; // <-- ADDED THIS FIELD
 }

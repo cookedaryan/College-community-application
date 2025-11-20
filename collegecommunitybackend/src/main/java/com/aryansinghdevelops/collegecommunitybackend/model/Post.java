@@ -18,13 +18,18 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(columnDefinition = "TEXT") // This is already correct
+    // NEW: Link to Club
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id") // Nullable
+    private Club club;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TEXT") // <-- ADD THIS ANNOTATION
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    private Integer score = 0;
+    private Integer score = 0; // Replaces likesCount
     private Integer commentsCount = 0;
 
     @CreationTimestamp

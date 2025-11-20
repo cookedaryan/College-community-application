@@ -1,7 +1,7 @@
 package com.aryansinghdevelops.collegecommunitybackend.service;
 
 import com.aryansinghdevelops.collegecommunitybackend.dto.ProfileResponseDto;
-import com.aryansinghdevelops.collegecommunitybackend.dto.UpdateProfileRequest; // <-- IMPORT ADDED
+import com.aryansinghdevelops.collegecommunitybackend.dto.UpdateProfileRequest;
 import com.aryansinghdevelops.collegecommunitybackend.dto.UserDto;
 import com.aryansinghdevelops.collegecommunitybackend.model.User;
 import com.aryansinghdevelops.collegecommunitybackend.repository.UserRepository;
@@ -47,8 +47,17 @@ public class UserService {
 
         User savedUser = userRepository.save(currentUser);
 
-        return new UserDto(savedUser.getDisplayName(), savedUser.getAvatarUrl(), savedUser.getBio(), savedUser.getSkills());
+        // UPDATED CONSTRUCTOR CALL to include role
+        return new UserDto(
+                savedUser.getDisplayName(),
+                savedUser.getAvatarUrl(),
+                savedUser.getBio(),
+                savedUser.getSkills(),
+                savedUser.getRole().name()
+        );
     }
+
+    // In UserService.java
 
     @Transactional(readOnly = true)
     public ProfileResponseDto getProfile(String profileUsername, User currentUser) {
@@ -58,7 +67,6 @@ public class UserService {
         response.setUsername(profileUser.getDisplayName());
         response.setAvatarUrl(profileUser.getAvatarUrl());
 
-        // Set new fields
         response.setBio(profileUser.getBio());
         response.setGender(profileUser.getGender());
         response.setDateOfBirth(profileUser.getDateOfBirth());
@@ -68,7 +76,9 @@ public class UserService {
         response.setFollowerCount(profileUser.getFollowers().size());
         response.setFollowingCount(profileUser.getFollowing().size());
 
-        response.setPosts(postService.getPostsByUser(profileUser, 0, 100, currentUser));
+        // REMOVED: response.setPosts(...); -> We fetch this separately now for speed!
+        response.setPosts(java.util.Collections.emptyList());
+
         response.setFollowing(profileUser.getFollowers().contains(currentUser));
 
         return response;

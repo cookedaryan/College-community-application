@@ -1,12 +1,8 @@
 package com.aryansinghdevelops.collegecommunitybackend.service;
 
 import com.aryansinghdevelops.collegecommunitybackend.dto.PostDto;
-import com.aryansinghdevelops.collegecommunitybackend.model.Post;
-import com.aryansinghdevelops.collegecommunitybackend.model.PostVote;
-import com.aryansinghdevelops.collegecommunitybackend.model.User;
-import com.aryansinghdevelops.collegecommunitybackend.model.VoteType;
-import com.aryansinghdevelops.collegecommunitybackend.repository.PostRepository;
-import com.aryansinghdevelops.collegecommunitybackend.repository.PostVoteRepository;
+import com.aryansinghdevelops.collegecommunitybackend.model.*;
+import com.aryansinghdevelops.collegecommunitybackend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,16 +22,57 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostVoteRepository postVoteRepository;
+    private final ClubRepository clubRepository;
+    private final ClubMemberRepository clubMemberRepository;
 
-    // ... (createPost and vote methods remain UNCHANGED) ...
     @Transactional
     public PostDto.PostResponse createPost(PostDto.PostCreateRequest request, User currentUser) {
         Post newPost = new Post();
         newPost.setContent(request.getContent());
         newPost.setImageUrl(request.getImageUrl());
         newPost.setUser(currentUser);
+
+        if (request.getClubId() != null) {
+            Club club = clubRepository.findById(request.getClubId())
+                    .orElseThrow(() -> new RuntimeException("Club not found"));
+
+            boolean isGlobalAdmin = currentUser.getRole() == Role.OWNER || currentUser.getRole() == Role.ADMIN;
+            if (!isGlobalAdmin) {
+                ClubMember member = clubMemberRepository.findByClubAndUser(club, currentUser)
+                        .orElseThrow(() -> new RuntimeException("You are not a member of this club"));
+                if (member.getRole() == ClubRole.MEMBER) {
+                    throw new RuntimeException("Only Admins and Co-Admins can post to the club feed.");
+                }
+            }
+            newPost.setClub(club);
+        }
+
         Post savedPost = postRepository.save(newPost);
-        return mapToPostResponse(savedPost, 0);
+        return mapToPostResponse(savedPost, 0, currentUser);
+    }
+
+    // --- NEW: Delete Post ---
+    @Transactional
+    public void deletePost(Long postId, User currentUser) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+
+        boolean isAuthor = post.getUser().getId().equals(currentUser.getId());
+        boolean isGlobalOwner = currentUser.getRole() == Role.OWNER;
+
+        if (isAuthor || isGlobalOwner) {
+            postRepository.delete(post);
+            return;
+        }
+
+        // Allow Club Admins to delete posts in their club
+        if (post.getClub() != null) {
+            clubMemberRepository.findByClubAndUser(post.getClub(), currentUser).ifPresent(member -> {
+                if (member.getRole() == ClubRole.ADMIN) postRepository.delete(post);
+                else throw new SecurityException("Not authorized");
+            });
+        } else {
+            throw new SecurityException("Not authorized to delete this post");
+        }
     }
 
     @Transactional
@@ -61,31 +98,38 @@ public class PostService {
         postRepository.save(post);
     }
 
-    // --- UPDATED: Accepts page and size ---
     @Transactional(readOnly = true)
     public List<PostDto.PostResponse> getAllPosts(int page, int size, User currentUser) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> postPage = postRepository.findAllByOrderByCreatedAtDesc(pageable);
-        List<Post> posts = postPage.getContent();
-
-        Map<Long, Integer> userVotes = getVotesMap(posts, currentUser);
-
-        return posts.stream()
-                .map(post -> mapToPostResponse(post, userVotes.getOrDefault(post.getId(), 0)))
-                .collect(Collectors.toList());
+        return mapPosts(postPage.getContent(), currentUser);
     }
 
-    // --- UPDATED: Accepts page and size ---
     @Transactional(readOnly = true)
     public List<PostDto.PostResponse> getPostsByUser(User user, int page, int size, User currentUser) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> postPage = postRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
-        List<Post> posts = postPage.getContent();
+        return mapPosts(postPage.getContent(), currentUser);
+    }
 
+    @Transactional(readOnly = true)
+    public List<PostDto.PostResponse> getAllClubPosts(int page, int size, User currentUser) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postPage = postRepository.findByClubIdIsNotNullOrderByCreatedAtDesc(pageable);
+        return mapPosts(postPage.getContent(), currentUser);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostDto.PostResponse> getPostsByClub(Long clubId, int page, int size, User currentUser) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postPage = postRepository.findByClubIdOrderByCreatedAtDesc(clubId, pageable);
+        return mapPosts(postPage.getContent(), currentUser);
+    }
+
+    private List<PostDto.PostResponse> mapPosts(List<Post> posts, User currentUser) {
         Map<Long, Integer> userVotes = getVotesMap(posts, currentUser);
-
         return posts.stream()
-                .map(post -> mapToPostResponse(post, userVotes.getOrDefault(post.getId(), 0)))
+                .map(post -> mapToPostResponse(post, userVotes.getOrDefault(post.getId(), 0), currentUser))
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +139,9 @@ public class PostService {
         return votes.stream().collect(Collectors.toMap(v -> v.getPost().getId(), v -> v.getVoteType().getDirection()));
     }
 
-    private PostDto.PostResponse mapToPostResponse(Post post, int currentUserVote) {
+    // Inside PostService.java, find the mapToPostResponse method:
+
+    private PostDto.PostResponse mapToPostResponse(Post post, int currentUserVote, User currentUser) {
         PostDto.PostResponse response = new PostDto.PostResponse();
         response.setId(post.getId());
         response.setContent(post.getContent());
@@ -106,6 +152,22 @@ public class PostService {
         response.setAuthorUsername(post.getUser().getDisplayName());
         response.setAuthorAvatarUrl(post.getUser().getAvatarUrl());
         response.setCurrentUserVote(currentUserVote);
+        response.setAuthorScholarId(post.getUser().getScholarId());
+
+        // --- UPDATED LOGIC ---
+        if (currentUser != null) {
+            // Check if IDs match
+            boolean match = post.getUser().getId().equals(currentUser.getId());
+            response.setAuthor(match);
+        } else {
+            response.setAuthor(false);
+        }
+        // ---------------------
+
+        if (post.getClub() != null) {
+            response.setClubName(post.getClub().getName());
+            response.setClubId(post.getClub().getId());
+        }
         return response;
     }
 }

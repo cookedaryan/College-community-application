@@ -27,13 +27,11 @@ public class PostController {
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
-    // --- UPDATED ENDPOINT ---
     @GetMapping
     public ResponseEntity<List<PostDto.PostResponse>> getAllPosts(
             @AuthenticationPrincipal User currentUser,
-            @RequestParam(defaultValue = "0") int page, // Start at page 0
-            @RequestParam(defaultValue = "10") int size // Load 10 at a time
-    ) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(postService.getAllPosts(page, size, currentUser));
     }
 
@@ -44,6 +42,13 @@ public class PostController {
             @AuthenticationPrincipal User currentUser) {
         VoteType type = VoteType.valueOf(request.getVoteType());
         postService.vote(postId, type, currentUser);
+        return ResponseEntity.ok().build();
+    }
+
+    // --- NEW: Delete Endpoint ---
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId, @AuthenticationPrincipal User currentUser) {
+        postService.deletePost(postId, currentUser);
         return ResponseEntity.ok().build();
     }
 }

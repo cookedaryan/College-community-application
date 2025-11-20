@@ -17,7 +17,7 @@
     <div class="auth-container">
         <form id="login-form" class="auth-form">
             <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="text" id="login-identifier" placeholder="Email or Scholar ID" required>
             <input type="password" id="login-password" placeholder="Password" required>
             <button type="submit">Login</button>
             <p>New user? <a href="#" id="show-signup" class="toggle-link">Create an account</a></p>
@@ -33,36 +33,27 @@
     </div>
 
     <script>
-        // --- Smart token validation and redirect check ---
+        // --- Smart token validation ---
         async function checkTokenAndRedirect() {
             const token = localStorage.getItem('jwt_token');
-            if (!token) {
-                // No token exists, so do nothing and show the login page.
-                return;
-            }
+            if (!token) return;
 
             try {
                 const response = await fetch('http://localhost:8080/api/users/me', {
                     method: 'GET',
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
 
                 if (response.ok) {
-                    // The token is valid, so redirect to the home page
                     window.location.href = 'home.html';
                 } else {
-                    // Token is expired or invalid, remove it from storage
                     localStorage.removeItem('jwt_token');
                 }
             } catch (error) {
-                // Server is likely down, do nothing
                 console.error('Could not validate token:', error);
             }
         }
 
-        // Run the check as soon as the page loads
         checkTokenAndRedirect();
 
         const loginForm = document.getElementById('login-form');
@@ -73,15 +64,19 @@
         showSignupLink.addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
         showLoginLink.addEventListener('click', e => { e.preventDefault(); signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
 
+        // --- LOGIN LOGIC ---
         loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const email = document.getElementById('login-email').value;
+            // FIXED: Get value from the new identifier input
+            const identifier = document.getElementById('login-identifier').value;
             const password = document.getElementById('login-password').value;
+            
             try {
                 const response = await fetch('http://localhost:8080/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    // FIXED: Send 'identifier' instead of 'email'
+                    body: JSON.stringify({ identifier: identifier, password: password })
                 });
                 if (!response.ok) throw new Error('Login failed!');
                 const data = await response.json();
@@ -92,6 +87,7 @@
             }
         });
 
+        // --- SIGNUP LOGIC ---
         signupForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const username = document.getElementById('signup-username').value;

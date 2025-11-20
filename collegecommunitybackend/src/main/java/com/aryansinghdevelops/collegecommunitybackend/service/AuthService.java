@@ -9,6 +9,7 @@ import com.aryansinghdevelops.collegecommunitybackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,42 +22,34 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Registers a new user, saves them, and returns a JWT token.
-     */
     public String register(SignUpRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Error: Email is already in use!");
         }
+
+        // --- Generate 10-digit Scholar ID ---
+        long randomId = (long) (Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L);
 
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
+                .scholarId(randomId) // Set the ID
                 .build();
 
-        // FIXED: Save the user and capture the returned, managed instance
         User savedUser = userRepository.save(user);
-
-        // FIXED: Use the saved instance to generate the token
         return jwtService.generateToken(savedUser);
     }
 
-    /**
-     * Authenticates an existing user and returns a JWT token.
-     */
     public String login(LoginRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        request.getIdentifier(),
                         request.getPassword()
                 )
         );
-
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
-
+        User user = (User) authentication.getPrincipal();
         return jwtService.generateToken(user);
     }
 }
