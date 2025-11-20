@@ -27,8 +27,9 @@ public class PostDto {
         private Long clubId;
         private Long authorScholarId;
 
-        // --- RENAMED FIELD ---
-        private boolean isAuthor; // Was 'ownPost', renamed for clarity
+        // --- PERMISSION FLAGS ---
+        private boolean isAuthor;
+        private boolean canDelete; // <-- NEW: True if Author OR Owner OR Admin
     }
 
     @Data

@@ -7,49 +7,38 @@
     <style>
         /* --- Base Styles --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; color: #1c1e21; overflow-x: hidden; }
-        
-        /* --- Top Nav --- */
+        /* Top Nav */
         .top-nav { background-color: white; border-bottom: 1px solid #dbdbdb; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
         .top-nav-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
         .nav-left { display: flex; align-items: center; gap: 15px; }
-        .nav-logo { font-size: 24px; font-weight: bold; color: #007bff; text-decoration: none; }
+        .nav-logo { font-size: 24px; font-weight: bold; color: #333435; text-decoration: none; }
         .nav-right { display: flex; align-items: center; gap: 15px; }
         .announce-btn { background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
         .profile-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; cursor: pointer; }
         .mobile-menu-btn { display: none; background: none; border: none; font-size: 24px; cursor: pointer; padding: 0; }
-
-        /* --- Main Layout --- */
+        /* Layout */
         .main-container { display: grid; grid-template-columns: 260px 1fr; gap: 30px; max-width: 1000px; margin: 20px auto; padding: 0 20px; align-items: start; }
-
-        /* --- Sidebar --- */
+        /* Sidebar */
         .left-sidebar { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); padding: 15px; position: sticky; top: 80px; height: fit-content; z-index: 900; }
+        .sidebar-mobile-header { display: none; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; color: #1c1e21; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; transition: background 0.2s; margin-bottom: 4px; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background-color: #f0f2f5; color: #007bff; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
         .nav-item.logout:hover { background-color: #fff0f0; color: #dc3545; }
-        .nav-item svg { width: 24px; height: 24px; fill: currentColor; stroke: none; }
-        .nav-item.logout svg { fill: none; stroke: currentColor; stroke-width: 2; }
         .divider { height: 1px; background: #dbdbdb; margin: 10px 0; }
-        .sidebar-mobile-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .sidebar-title { font-weight: bold; font-size: 18px; }
-        .sidebar-close { font-size: 24px; cursor: pointer; background: none; border: none; }
-
-        /* --- Feed --- */
+        /* Feed */
         .feed-container { max-width: 600px; margin: 0 auto; width: 100%; }
-
-        /* --- Post Card --- */
-        .post-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        /* Post Card */
+        .post-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; overflow: visible; position: relative; }
         .post-header { display: flex; align-items: center; padding: 12px 16px; }
         .post-header img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; margin-right: 12px; background-color: #eee; }
         .post-author-info { display: flex; flex-direction: column; }
         .post-author-name { font-weight: 600; font-size: 16px; text-decoration: none; color: inherit; }
-        .post-author-name:hover { text-decoration: underline; }
         .post-meta { font-size: 14px; color: #65676b; }
-        .post-options { margin-left: auto; font-weight: bold; cursor: pointer; }
         .post-content { padding: 4px 16px; font-size: 16px; line-height: 1.5; word-wrap: break-word; }
         .post-image { width: 100%; margin-top: 12px; display: block; }
         .post-text-only .post-content p { font-size: 20px; line-height: 1.5; padding: 10px 0; }
         .post-actions { display: flex; align-items: center; padding: 8px 16px; border-top: 1px solid #f0f2f5; margin-top: 12px; }
-        
         .vote-group { display: flex; align-items: center; background-color: #f0f2f5; border-radius: 20px; padding: 4px 12px; margin-right: 15px; }
         .vote-score { font-weight: 700; font-size: 14px; color: #1c1e21; margin-left: 5px; min-width: 15px; text-align: center; }
         .action-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600; color: #65676b; padding: 8px; border-radius: 50%; transition: all 0.2s; }
@@ -58,7 +47,16 @@
         .upvote-btn.active svg { stroke: #ff4500; fill: #ff4500; }
         .upvote-btn.active { color: #ff4500; background-color: rgba(255, 69, 0, 0.1); }
 
-        /* --- Skeletons --- */
+        /* --- Post Options (3 Dots) --- */
+        .post-options-container { margin-left: auto; position: relative; }
+        .post-options-btn { font-weight: bold; cursor: pointer; background: none; border: none; font-size: 20px; padding: 5px; color: #65676b; }
+        .post-options-menu { position: absolute; top: 100%; right: 0; background: white; border: 1px solid #dbdbdb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; display: none; min-width: 120px; }
+        .post-options-menu.show { display: block; }
+        .menu-option { display: block; width: 100%; padding: 10px 15px; text-align: left; background: none; border: none; cursor: pointer; font-size: 14px; }
+        .menu-option:hover { background-color: #f0f2f5; }
+        .menu-option.delete { color: #dc3545; font-weight: 600; }
+
+        /* Skeletons */
         .skeleton-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; padding: 16px; }
         .skeleton-header { display: flex; align-items: center; margin-bottom: 15px; }
         .skeleton-avatar { width: 42px; height: 42px; border-radius: 50%; background: #eee; }
@@ -69,9 +67,8 @@
         .skeleton-body { height: 150px; background: #eee; border-radius: 4px; margin-top: 15px; }
         .skeleton-avatar, .skeleton-line, .skeleton-body { animation: shimmer 1.5s infinite linear; background: linear-gradient(to right, #eee 4%, #f5f5f5 25%, #eee 36%); background-size: 1000px 100%; }
         @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-        #sentinel { height: 10px; }
 
-        /* --- Comment Sidebar --- */
+        /* Comments, Modals, Mobile */
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { display: block; opacity: 1; }
         .comment-sidebar { position: fixed; top: 0; right: -100%; width: 400px; height: 100%; background: white; z-index: 2001; box-shadow: -2px 0 10px rgba(0,0,0,0.1); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
@@ -79,13 +76,11 @@
         .sidebar-header { padding: 15px 20px; border-bottom: 1px solid #dbdbdb; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 18px; }
         .sidebar-close-btn { background: none; border: none; font-size: 28px; cursor: pointer; padding: 0; line-height: 1; }
         .sidebar-body { flex-grow: 1; overflow-y: auto; padding: 20px; }
-        .loading-spinner { text-align: center; color: #65676b; margin-top: 20px; }
         .sidebar-footer { padding: 15px; border-top: 1px solid #dbdbdb; background: white; }
         .comment-input-container { display: flex; align-items: center; border: 1px solid #dbdbdb; border-radius: 25px; padding: 5px 15px; background: #f0f2f5; }
         .sidebar-input { flex-grow: 1; border: none; background: transparent; padding: 10px; outline: none; font-size: 14px; }
         .sidebar-send-btn { color: #0095f6; font-weight: bold; border: none; background: none; cursor: pointer; padding: 5px; }
         .reply-badge { font-size: 12px; color: #65676b; margin-bottom: 5px; display: none; justify-content: space-between; padding: 0 5px; }
-        .reply-cancel { color: #ed4956; cursor: pointer; font-weight: bold; }
         .comment-item { margin-bottom: 12px; }
         .comment-display { display: flex; gap: 10px; align-items: flex-start; }
         .comment-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
@@ -95,46 +90,32 @@
         .comment-text { font-size: 14px; line-height: 1.4; margin: 0; color: #050505; }
         .comment-actions { margin-top: 2px; margin-left: 12px; font-size: 12px; color: #65676b; display: flex; gap: 15px; font-weight: 600; }
         .reply-action { cursor: pointer; }
-        .reply-action:hover { text-decoration: underline; }
         .replies-container { margin-left: 16px; padding-left: 12px; border-left: 2px solid #e0e0e0; margin-top: 6px; }
-
-        /* --- Create Post Modal --- */
         .modal-overlay-post { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
         .modal-content { background: white; border-radius: 12px; width: 500px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 90vh; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #dbdbdb; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close-btn { background: none; border: none; font-size: 28px; font-weight: 300; cursor: pointer; color: #65676b; }
         .modal-body { padding: 20px; overflow-y: auto; }
         .post-form-card textarea { width: 100%; min-height: 150px; padding: 10px; border: none; outline: none; font-size: 16px; resize: none; font-family: inherit; }
         .post-form-card input[type="text"] { width: 100%; padding: 10px; border: 1px solid #dbdbdb; border-radius: 6px; margin-bottom: 15px; }
         .post-form-card button { background-color: #0095f6; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 15px; }
-
-        /* --- Mobile Responsive --- */
-        @media (max-width: 900px) {
-            .main-container { display: block; }
-            .mobile-menu-btn { display: block; }
-            .left-sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; margin: 0; border-radius: 0; transition: left 0.3s ease; z-index: 2001; padding: 20px; overflow-y: auto; background: white; }
-            .left-sidebar.active { left: 0; }
-            .sidebar-mobile-header { display: flex; }
-            .comment-sidebar { width: 100%; }
-        }
+        .hidden { display: none !important; }
+        @media (max-width: 900px) { .main-container { display: block; } .mobile-menu-btn { display: block; } .left-sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; margin: 0; border-radius: 0; transition: left 0.3s ease; z-index: 2001; padding: 20px; overflow-y: auto; background: white; } .left-sidebar.active { left: 0; } .comment-sidebar { width: 100%; } }
         .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; }
         .nav-overlay.active { display: block; opacity: 1; }
     </style>
 </head>
 <body>
-
     <header class="top-nav">
         <div class="top-nav-content">
             <div class="nav-left">
                 <button class="mobile-menu-btn" id="mobile-menu-btn">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
-                <a href="home.html" class="nav-logo">⚡ MonoSpace</a>
+                <img src="assets/app-logo.jpg" style="height: 40px;">
+                <a href="home.html" class="nav-logo">MonoSpace</a>
             </div>
             <div class="nav-right">
                 <button class="announce-btn" id="announce-btn-open">Announce</button>
-                <img src="https://via.placeholder.com/32" alt="My Profile" class="profile-pic" id="nav-profile-pic">
             </div>
         </div>
     </header>
@@ -155,7 +136,7 @@
             <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg> Marketplace</a>
             <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Peerly</a>
             <div class="divider"></div>
-            <a href="settings.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Settings</a>
+            <a href="settings.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92 3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Settings</a>
             <div class="divider"></div>
             <a href="#" class="nav-item logout" id="logout-btn"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" style="fill:none; stroke:currentColor; stroke-width:2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</a>
         </div>
@@ -170,13 +151,13 @@
     <div id="create-post-modal" class="modal-overlay-post">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Create Post</h2>
+                <div style="font-weight:bold; font-size: 16px;">Create new post</div>
                 <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="post-form-card">
                     <form id="create-post-form">
-                        <textarea id="post-content" placeholder="What's on your mind?" required rows="5"></textarea>
+                        <textarea id="post-content" placeholder="What's on your mind?" required></textarea>
                         <input type="text" id="image-url" placeholder="Image URL (Optional)">
                         <button type="submit">Share</button>
                     </form>
@@ -200,28 +181,25 @@
         const skeletonContainer = document.getElementById('skeleton-container');
         const sentinel = document.getElementById('sentinel');
         const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'index.html';
         
-        // Mobile Nav Logic
+        // Navigation
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const leftSidebar = document.getElementById('left-sidebar');
         const navOverlay = document.getElementById('nav-overlay');
         const navCloseBtn = document.getElementById('nav-close-btn');
-        if (mobileMenuBtn && leftSidebar && navOverlay && navCloseBtn) {
-            function openMobileNav() { leftSidebar.classList.add('active'); navOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
-            function closeMobileNav() { leftSidebar.classList.remove('active'); navOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-            mobileMenuBtn.addEventListener('click', openMobileNav);
-            navCloseBtn.addEventListener('click', closeMobileNav);
-            navOverlay.addEventListener('click', closeMobileNav);
+        if(mobileMenuBtn) {
+             mobileMenuBtn.addEventListener('click', () => { leftSidebar.classList.add('active'); navOverlay.classList.add('active'); });
+             navCloseBtn.addEventListener('click', () => { leftSidebar.classList.remove('active'); navOverlay.classList.remove('active'); });
+             navOverlay.addEventListener('click', () => { leftSidebar.classList.remove('active'); navOverlay.classList.remove('active'); });
         }
+        document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('jwt_token'); window.location.href = 'index.html'; });
 
-        // Modal Elements
-        const navProfilePic = document.getElementById('nav-profile-pic');
+        // Elements
         const createPostModal = document.getElementById('create-post-modal');
         const openModalBtn = document.getElementById('announce-btn-open');
         const closeModalBtn = document.getElementById('modal-close-btn');
         const createPostForm = document.getElementById('create-post-form');
-
-        // Comment Sidebar Elements
         const commentSidebar = document.getElementById('comment-sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
@@ -241,7 +219,6 @@
         openModalBtn.addEventListener('click', () => createPostModal.style.display = 'flex');
         closeModalBtn.addEventListener('click', () => createPostModal.style.display = 'none');
         createPostModal.addEventListener('click', (e) => { if(e.target === createPostModal) createPostModal.style.display = 'none'; });
-        navProfilePic.addEventListener('click', () => window.location.href = 'profile.html');
         sidebarCloseBtn.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
         sidebarSendBtn.addEventListener('click', () => submitComment());
@@ -253,32 +230,13 @@
         const shareIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
         const trashIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 
-        // Helper: Time Ago
-        function timeAgo(dateString) {
-            const now = new Date(); const date = new Date(dateString);
-            const seconds = Math.floor((now - date) / 1000);
-            let interval = Math.floor(seconds / 31536000);
-            if (interval >= 1) return interval + "y";
-            interval = Math.floor(seconds / 2592000);
-            if (interval >= 1) return interval + "mo";
-            interval = Math.floor(seconds / 86400);
-            if (interval >= 1) return interval + "d";
-            interval = Math.floor(seconds / 3600);
-            if (interval >= 1) return interval + "h";
-            interval = Math.floor(seconds / 60);
-            if (interval >= 1) return interval + "m";
-            return "now";
-        }
-
-        // Skeletons
         function renderSkeletons(count = 3) {
             let html = '';
             for(let i=0; i<count; i++) { html += `<div class="skeleton-card"><div class="skeleton-header"><div class="skeleton-avatar"></div><div class="skeleton-info"><div class="skeleton-line short"></div><div class="skeleton-line long"></div></div></div><div class="skeleton-body"></div></div>`; }
-            skeletonContainer.innerHTML = html;
+            if(skeletonContainer) skeletonContainer.innerHTML = html;
         }
-        function clearSkeletons() { skeletonContainer.innerHTML = ''; }
+        function clearSkeletons() { if(skeletonContainer) skeletonContainer.innerHTML = ''; }
 
-        // Display Post
         function displayPost(post, prepend = false) {
             const postElement = document.createElement('div');
             postElement.classList.add('post-card');
@@ -287,17 +245,23 @@
             const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : '';
             const avatarUrl = post.authorAvatarUrl ? post.authorAvatarUrl : 'https://via.placeholder.com/42';
             const upActive = post.currentUserVote === 1 ? 'active' : '';
-            
             const scholarIdDisplay = post.authorScholarId ? `<span style="color:#888; font-weight:normal; font-size:13px; margin-left:5px;">#${post.authorScholarId}</span>` : '';
-            const deleteButton = post.ownPost ? 
-                `<button class="action-btn delete-btn" onclick="deletePost(${post.id}, this)" style="margin-left:auto; color:#dc3545;">${trashIcon}</button>` 
-                : `<span class="post-options" style="margin-left:auto;">...</span>`;
+
+            // FIX: Check post.canDelete to show/hide trash icon
+            const deleteButton = post.canDelete ? 
+                `<div class="post-options-container">
+                    <button class="post-options-btn" onclick="toggleOptionsMenu(${post.id}, this)">...</button>
+                    <div class="post-options-menu" id="menu-${post.id}">
+                        <button class="menu-option delete" onclick="deletePost(${post.id}, this)">Delete Post</button>
+                    </div>
+                </div>` 
+                : `<span class="post-options"></span>`; // Empty if can't delete
 
             let contentHtml = post.imageUrl ? `<div class="post-content"><p>${post.content}</p><img src="${post.imageUrl}" alt="Post image" class="post-image"></div>` : (() => { postElement.classList.add('post-text-only'); return `<div class="post-content"><p>${post.content}</p></div>`; })();
 
             postElement.innerHTML = `
                 <div class="post-header">
-                    <img src="${avatarUrl}" alt="${post.authorUsername}'s profile pic" class="profile-pic" onclick="window.location.href='profile.html?username=${post.authorUsername}'">
+                    <img src="${avatarUrl}" alt="Profile" class="profile-pic" onclick="window.location.href='profile.html?username=${post.authorUsername}'">
                     <div class="post-author-info">
                         <a href="profile.html?username=${post.authorUsername}" class="post-author-name">${post.authorUsername} ${scholarIdDisplay}</a>
                         <span class="post-meta">${postDate}</span>
@@ -307,14 +271,10 @@
                 ${contentHtml}
                 <div class="post-actions">
                     <div class="vote-group">
-                        <button class="action-btn upvote-btn ${upActive}">
-                            ${upArrowIcon}
-                        </button>
+                        <button class="action-btn upvote-btn ${upActive}">${upArrowIcon}</button>
                         <span class="vote-score">${post.score}</span>
                     </div>
-                    <button class="action-btn comment-trigger-btn">
-                        ${commentIcon} <span id="comment-count-${post.id}">${post.commentsCount}</span>
-                    </button>
+                    <button class="action-btn comment-trigger-btn">${commentIcon} <span>${post.commentsCount}</span></button>
                     <button class="action-btn" style="margin-left: auto;">${shareIcon}</button>
                 </div>`;
 
@@ -329,12 +289,41 @@
             else postsContainer.appendChild(postElement);
         }
 
-        // Vote
+        // --- Menu & Delete Logic ---
+        window.toggleOptionsMenu = function(postId, btn) {
+            const menu = document.getElementById(`menu-${postId}`);
+            const allMenus = document.querySelectorAll('.post-options-menu');
+            allMenus.forEach(m => { if(m !== menu) m.classList.remove('show'); });
+            menu.classList.toggle('show');
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target) && e.target !== btn) {
+                    menu.classList.remove('show');
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        }
+
+        window.deletePost = async function(postId, btnElement) {
+            if(!confirm("Delete this post?")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/posts/${postId}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if(res.ok) {
+                    // Ideally refresh feed or remove element
+                    location.reload(); // Simplest for now
+                } else { alert("Failed to delete."); }
+            } catch(e) { alert(e.message); }
+        }
+
+        // ... (Rest of logic: Vote, Comment, Fetch - Same as clubs.html) ...
+        // Pasting standard logic for completeness
+        
         async function handleVote(postId, voteType, clickedBtn, scoreEl) {
             try {
                 let score = parseInt(scoreEl.textContent);
-                const isRemoving = clickedBtn.classList.contains('active');
-                if (isRemoving) { clickedBtn.classList.remove('active'); score--; } 
+                if (clickedBtn.classList.contains('active')) { clickedBtn.classList.remove('active'); score--; } 
                 else { clickedBtn.classList.add('active'); score++; }
                 scoreEl.textContent = score;
                 await fetch(`http://localhost:8080/api/posts/${postId}/vote`, {
@@ -343,34 +332,31 @@
                 });
             } catch (error) { console.error(error); }
         }
-        
-        // Delete
-        window.deletePost = async function(postId, btnElement) {
-            if(!confirm("Are you sure you want to delete this post?")) return;
-            try {
-                const res = await fetch(`http://localhost:8080/api/posts/${postId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-                if(res.ok) { const card = btnElement.closest('.post-card'); card.remove(); } 
-                else { alert("Failed to delete post."); }
-            } catch(e) { alert(e.message); }
-        }
 
-        // --- COMMENTS ---
         async function openSidebar(postId) {
             currentOpenPostId = postId; cancelReply();
-            sidebarBody.innerHTML = '<div class="loading-spinner">Loading comments...</div>';
+            sidebarBody.innerHTML = '<div class="loading-spinner">Loading...</div>';
             sidebarOverlay.classList.add('active'); commentSidebar.classList.add('active');
             document.body.style.overflow = 'hidden';
             try {
                 const res = await fetch(`http://localhost:8080/api/posts/${postId}/comments`, { headers: { 'Authorization': 'Bearer ' + token } });
                 const comments = await res.json();
                 renderComments(comments);
-            } catch (e) { sidebarBody.innerHTML = '<div style="padding:20px; text-align:center;">Failed to load comments.</div>'; }
+            } catch (e) {}
         }
         function closeSidebar() { sidebarOverlay.classList.remove('active'); commentSidebar.classList.remove('active'); document.body.style.overflow = ''; currentOpenPostId = null; }
         
         function renderComments(comments) {
-            if (comments.length === 0) { sidebarBody.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">No comments yet. Be the first!</div>'; return; }
+            if (comments.length === 0) { sidebarBody.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">No comments yet.</div>'; return; }
             sidebarBody.innerHTML = comments.map(c => buildCommentHtml(c)).join('');
+        }
+
+        function timeAgo(dateString) {
+            const now = new Date(); const date = new Date(dateString);
+            const seconds = Math.floor((now - date) / 1000);
+            if (Math.floor(seconds / 3600) >= 1) return Math.floor(seconds / 3600) + "h";
+            if (Math.floor(seconds / 60) >= 1) return Math.floor(seconds / 60) + "m";
+            return "now";
         }
 
         function buildCommentHtml(comment) {
@@ -380,10 +366,9 @@
             if (comment.replies && comment.replies.length > 0) { repliesHtml = `<div class="replies-container">${comment.replies.map(r => buildCommentHtml(r)).join('')}</div>`; }
             return `<div class="comment-item"><div class="comment-display"><img src="${avatar}" class="comment-avatar"><div class="comment-content-wrapper"><div class="comment-bubble"><span class="comment-author">${comment.authorUsername}</span><p class="comment-text">${comment.content}</p></div><div class="comment-actions"><span>Like</span><span class="reply-action" onclick="setReply(${comment.id}, '${comment.authorUsername}')">Reply</span><span>${timeString}</span></div></div></div>${repliesHtml}</div>`;
         }
-
         window.setReply = function(commentId, username) { currentReplyParentId = commentId; replyingToText.textContent = `Replying to ${username}`; replyBadge.style.display = 'flex'; sidebarInput.focus(); };
         window.cancelReply = function() { currentReplyParentId = null; replyBadge.style.display = 'none'; };
-
+        
         async function submitComment() {
             const content = sidebarInput.value.trim();
             if (!content || !currentOpenPostId) return;
@@ -393,21 +378,12 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ content, parentId: currentReplyParentId })
                 });
-                if (res.ok) {
-                    sidebarInput.value = ''; cancelReply();
-                    const refreshRes = await fetch(`http://localhost:8080/api/posts/${currentOpenPostId}/comments`, { headers: { 'Authorization': 'Bearer ' + token } });
-                    const comments = await refreshRes.json();
-                    renderComments(comments);
-                    const countSpan = document.getElementById(`comment-count-${currentOpenPostId}`);
-                    if(countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                }
-            } catch (e) { alert(e.message); } finally { sidebarSendBtn.disabled = false; }
+                if (res.ok) { sidebarInput.value = ''; cancelReply(); openSidebar(currentOpenPostId); }
+            } catch (e) {} finally { sidebarSendBtn.disabled = false; }
         }
 
-        // --- INFINITE SCROLL ---
         async function fetchPosts() {
             if (isLoading || !hasMore) return;
-            if (!token) { window.location.href = 'index.html'; return; }
             isLoading = true;
             if(currentPage === 0) renderSkeletons(5);
             try {
@@ -441,10 +417,6 @@
                 createPostModal.style.display = 'none';
             } catch (error) { alert(error.message); }
         });
-        
-        // Logout
-        const logoutBtn = document.getElementById('logout-btn');
-        if(logoutBtn) { logoutBtn.addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('jwt_token'); window.location.href = 'index.html'; }); }
     </script>
 </body>
 </html>

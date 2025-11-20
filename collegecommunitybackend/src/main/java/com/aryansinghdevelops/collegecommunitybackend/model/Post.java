@@ -5,6 +5,8 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -18,9 +20,8 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // NEW: Link to Club
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id") // Nullable
+    @JoinColumn(name = "club_id")
     private Club club;
 
     @Column(columnDefinition = "TEXT")
@@ -29,8 +30,18 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    private Integer score = 0; // Replaces likesCount
+    private Integer score = 0;
     private Integer commentsCount = 0;
+
+    // --- COMMENTS (Already added) ---
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    // --- ADD THIS: VOTES ---
+    // This ensures that deleting a Post also deletes its Upvotes/Downvotes
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostVote> votes = new ArrayList<>();
+    // -----------------------
 
     @CreationTimestamp
     private OffsetDateTime createdAt;

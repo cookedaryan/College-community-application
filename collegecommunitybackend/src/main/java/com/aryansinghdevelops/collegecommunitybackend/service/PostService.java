@@ -51,25 +51,27 @@ public class PostService {
         return mapToPostResponse(savedPost, 0, currentUser);
     }
 
-    // --- NEW: Delete Post ---
     @Transactional
     public void deletePost(Long postId, User currentUser) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
 
+        // Permission Logic:
+        // 1. Author
+        // 2. Global Owner
+        // 3. Club Admin (for posts in their club)
         boolean isAuthor = post.getUser().getId().equals(currentUser.getId());
         boolean isGlobalOwner = currentUser.getRole() == Role.OWNER;
+        boolean isClubAdmin = false;
 
-        if (isAuthor || isGlobalOwner) {
-            postRepository.delete(post);
-            return;
+        if (post.getClub() != null) {
+            Optional<ClubMember> member = clubMemberRepository.findByClubAndUser(post.getClub(), currentUser);
+            if (member.isPresent() && member.get().getRole() == ClubRole.ADMIN) {
+                isClubAdmin = true;
+            }
         }
 
-        // Allow Club Admins to delete posts in their club
-        if (post.getClub() != null) {
-            clubMemberRepository.findByClubAndUser(post.getClub(), currentUser).ifPresent(member -> {
-                if (member.getRole() == ClubRole.ADMIN) postRepository.delete(post);
-                else throw new SecurityException("Not authorized");
-            });
+        if (isAuthor || isGlobalOwner || isClubAdmin) {
+            postRepository.delete(post);
         } else {
             throw new SecurityException("Not authorized to delete this post");
         }
@@ -139,8 +141,6 @@ public class PostService {
         return votes.stream().collect(Collectors.toMap(v -> v.getPost().getId(), v -> v.getVoteType().getDirection()));
     }
 
-    // Inside PostService.java, find the mapToPostResponse method:
-
     private PostDto.PostResponse mapToPostResponse(Post post, int currentUserVote, User currentUser) {
         PostDto.PostResponse response = new PostDto.PostResponse();
         response.setId(post.getId());
@@ -154,15 +154,25 @@ public class PostService {
         response.setCurrentUserVote(currentUserVote);
         response.setAuthorScholarId(post.getUser().getScholarId());
 
-        // --- UPDATED LOGIC ---
+        // --- PERMISSION MAPPING ---
         if (currentUser != null) {
-            // Check if IDs match
-            boolean match = post.getUser().getId().equals(currentUser.getId());
-            response.setAuthor(match);
+            boolean isAuthor = post.getUser().getId().equals(currentUser.getId());
+            response.setAuthor(isAuthor);
+
+            boolean isGlobalOwner = currentUser.getRole() == Role.OWNER;
+            boolean isClubAdmin = false;
+            if (post.getClub() != null) {
+                Optional<ClubMember> member = clubMemberRepository.findByClubAndUser(post.getClub(), currentUser);
+                if (member.isPresent() && member.get().getRole() == ClubRole.ADMIN) isClubAdmin = true;
+            }
+
+            // Set canDelete true if any condition is met
+            response.setCanDelete(isAuthor || isGlobalOwner || isClubAdmin);
+
         } else {
             response.setAuthor(false);
+            response.setCanDelete(false);
         }
-        // ---------------------
 
         if (post.getClub() != null) {
             response.setClubName(post.getClub().getName());
